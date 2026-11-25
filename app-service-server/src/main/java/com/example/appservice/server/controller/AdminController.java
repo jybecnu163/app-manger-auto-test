@@ -79,8 +79,9 @@ public class AdminController {
     }
 
     @GetMapping("/interfaces/{interfaceId}/stats")
-    public Result<TestStatsVO> stats(@PathVariable Long interfaceId) {
-        return Result.ok(testProxyService.stats(interfaceId));
+    public Result<TestStatsVO> stats(@PathVariable Long interfaceId,
+                                     @RequestParam(required = false) String replayMode) {
+        return Result.ok(testProxyService.stats(interfaceId, replayMode));
     }
 
     @PostMapping("/apps/{appId}/interfaces/{interfaceId}/cases")

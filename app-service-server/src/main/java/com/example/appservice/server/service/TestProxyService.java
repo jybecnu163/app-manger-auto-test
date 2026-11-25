@@ -141,9 +141,15 @@ public class TestProxyService {
         TestLog log = new TestLog();
         log.setAppId(appId);
         log.setInterfaceId(api.getId());
-        log.setRequestSummary(String.valueOf(req));
+        log.setRequestSummary(String.valueOf(req)
+                + (dryRun ? " [DRY_RUN mockMisses=" + vo.getMockMisses() + "]" : ""));
         log.setResponseStatus(vo.getStatus());
         log.setCostMs(cost);
+        log.setReplayId(vo.getReplayId());
+        log.setReplayMode(vo.getReplayMode() == null ? "NONE" : vo.getReplayMode().name());
+        log.setDbRolledBack(vo.isDbRolledBack());
+        log.setMockHits(vo.getMockHits());
+        log.setMockMisses(vo.getMockMisses());
         log.setCreatedAt(LocalDateTime.now());
         testLogMapper.insert(log);
 
@@ -247,9 +253,11 @@ public class TestProxyService {
         return text.length() > 120 ? text.substring(0, 120) + "..." : text;
     }
 
-    public TestStatsVO stats(Long interfaceId) {
+    public TestStatsVO stats(Long interfaceId, String replayMode) {
+        String mode = replayMode == null || replayMode.isBlank() ? "NONE" : replayMode.trim().toUpperCase();
         List<TestLog> logs = testLogMapper.selectList(new LambdaQueryWrapper<TestLog>()
-                .eq(TestLog::getInterfaceId, interfaceId));
+                .eq(TestLog::getInterfaceId, interfaceId)
+                .eq(TestLog::getReplayMode, mode));
         TestStatsVO stats = new TestStatsVO();
         stats.setTotal(logs.size());
         if (logs.isEmpty()) {
