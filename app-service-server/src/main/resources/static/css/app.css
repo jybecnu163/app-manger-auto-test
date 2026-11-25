@@ -233,3 +233,38 @@ pre {
 .traffic-trace { max-width: 140px; word-break: break-all; color: #8f959e; }
 .traffic-panel .card { margin-top: 12px; }
 .traffic-panel pre { max-height: 260px; overflow: auto; }
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.modal-content {
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px;
+}
+.modal-content label {
+    display: block;
+    margin: 10px 0;
+    font-weight: 600;
+}
+.modal-content label input {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    box-sizing: border-box;
+}
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+.hint { color: #8f959e; font-size: 12px; }
+.result { max-height: 160px; overflow: auto; }

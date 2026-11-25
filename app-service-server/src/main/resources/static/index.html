@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>系统管理平台</title>
-    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/app.css?v=20261125g">
 </head>
 <body>
 <div class="container">
@@ -16,6 +16,7 @@
             <option value="OFFLINE">离线</option>
         </select>
         <button id="refresh">刷新</button>
+        <button id="generateApp" class="secondary">生成空壳系统</button>
     </div>
     <table>
         <thead>
@@ -31,7 +32,21 @@
         <tbody id="appRows"></tbody>
     </table>
 </div>
+<div id="scaffoldModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h2>生成空壳业务系统</h2>
+        <label>系统名称 <input id="scaffoldName" placeholder="demo-app"></label>
+        <label>端口 <input id="scaffoldPort" type="number" value="18080"></label>
+        <label>环境 <input id="scaffoldEnv" value="dev"></label>
+        <p class="hint">生成的项目包含 /api/health，启动后会自动注册到当前管理端。</p>
+        <pre id="scaffoldInfo" class="result"></pre>
+        <div class="modal-actions">
+            <button id="scaffoldClose" class="secondary">关闭</button>
+            <button id="scaffoldSubmit">生成并下载</button>
+        </div>
+    </div>
+</div>
 <script src="/js/common.js?v=20261125a"></script>
-<script src="/js/app.js?v=20261125a"></script>
+<script src="/js/app.js?v=20261125g"></script>
 </body>
 </html>
