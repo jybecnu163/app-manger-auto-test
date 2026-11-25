@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统详情</title>
+    <link rel="stylesheet" href="/css/app.css?v=20261125d">
+</head>
+<body>
+<div class="container">
+    <a href="/">← 返回列表</a>
+
+    <h2>实例列表</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>实例标识</th>
+            <th>地址</th>
+            <th>主机名</th>
+            <th>启动时间</th>
+        </tr>
+        </thead>
+        <tbody id="instancesBody"></tbody>
+    </table>
+
+    <div class="tabs">
+        <button id="tabInterfaces" class="tab active">接口列表</button>
+        <button id="tabCases" class="tab">测试用例列表</button>
+    </div>
+    <div class="split">
+        <div class="left-panel">
+            <div id="interfaces" class="interface-list"></div>
+            <div id="caseToolbar" class="case-toolbar" style="display:none">
+                <button id="replayAllCases">回放所有用例</button>
+                <span id="replayAllStatus" class="muted"></span>
+            </div>
+            <div id="caseList" class="interface-list" style="display:none"></div>
+        </div>
+        <div id="interfaceDetail" class="card">
+            <p class="muted">请选择一个接口或测试用例。</p>
+        </div>
+    </div>
+</div>
+<script src="/js/common.js?v=20261125d"></script>
+<script src="/js/test.js?v=20261125d"></script>
+</body>
+</html>

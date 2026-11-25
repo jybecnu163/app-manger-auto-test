@@ -1,0 +1,16 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: product-service
+
+app:
+  registry:
+    server-url: http://localhost:8080
+    system-name: product-service
+    env: dev
+    advertise-ip: 127.0.0.1
+    appid: APP0001
+    token: product-demo-token
+    heartbeat-interval: 30s

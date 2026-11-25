@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统管理平台</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="container">
+    <h1>系统管理平台</h1>
+    <div class="toolbar">
+        <input id="search" placeholder="搜索系统名称或环境">
+        <select id="status">
+            <option value="">全部状态</option>
+            <option value="ONLINE">在线</option>
+            <option value="OFFLINE">离线</option>
+        </select>
+        <button id="refresh">刷新</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>系统名称</th>
+            <th>环境</th>
+            <th>实例</th>
+            <th>接口数</th>
+            <th>最近心跳</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="appRows"></tbody>
+    </table>
+</div>
+<script src="/js/common.js?v=20261125a"></script>
+<script src="/js/app.js?v=20261125a"></script>
+</body>
+</html>

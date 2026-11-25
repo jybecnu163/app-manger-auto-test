@@ -1,0 +1,16 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: order-service
+
+app:
+  registry:
+    server-url: http://localhost:8080
+    system-name: order-service
+    env: dev
+    advertise-ip: 127.0.0.1
+    appid: APP0002
+    token: order-demo-token
+    heartbeat-interval: 30s
