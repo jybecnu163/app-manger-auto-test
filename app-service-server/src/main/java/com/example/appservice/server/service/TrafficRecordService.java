@@ -9,9 +9,11 @@ import com.example.appservice.server.mapper.TrafficRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -64,12 +66,16 @@ public class TrafficRecordService {
     }
 
     public Long findInterfaceId(String appId, String method, String path) {
-        ApiInterface apiInterface = interfaceMapper.selectOne(new LambdaQueryWrapper<ApiInterface>()
+        List<ApiInterface> candidates = interfaceMapper.selectList(new LambdaQueryWrapper<ApiInterface>()
                 .eq(ApiInterface::getAppId, appId)
-                .eq(ApiInterface::getMethod, method)
-                .eq(ApiInterface::getPath, path)
-                .last("limit 1"));
-        return apiInterface == null ? null : apiInterface.getId();
+                .eq(ApiInterface::getMethod, method));
+        AntPathMatcher matcher = new AntPathMatcher();
+        return candidates.stream()
+                .filter(item -> matcher.match(item.getPath(), path))
+                .sorted(Comparator.comparingInt((ApiInterface item) -> item.getPath().length()).reversed())
+                .map(ApiInterface::getId)
+                .findFirst()
+                .orElse(null);
     }
 
     private boolean duplicate(String appId, TrafficRecordDTO dto) {

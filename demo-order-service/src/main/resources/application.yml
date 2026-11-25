@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: order-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
 
 app:
   registry:
@@ -14,3 +23,21 @@ app:
     appid: APP0002
     token: order-demo-token
     heartbeat-interval: 30s
+    traffic-record:
+      enabled: true
+      sample-rate: 1.0
+      include-paths:
+        - /api/**
+      batch-size: 20
+      flush-interval: 2s
+    external-call-record:
+      enabled: true
+    replay:
+      enabled: true
+      db-strategy: rollback
+      mock-missing-policy: fail
+      signature-secret: app-service-replay-secret
+      mock-response-path: /api/agent/mock-responses
+
+demo:
+  product-url: http://localhost:8081/api/products/1

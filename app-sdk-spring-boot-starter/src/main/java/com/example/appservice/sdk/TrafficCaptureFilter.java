@@ -99,7 +99,7 @@ public class TrafficCaptureFilter extends OncePerRequestFilter {
 
     private boolean shouldCapture(String path, HttpServletRequest request) {
         AppRegistryProperties.TrafficRecordProperties config = properties.getTrafficRecord();
-        if (!config.isEnabled()) {
+        if (!config.isEnabled() || ReplayContext.isReplay()) {
             return false;
         }
         for (String exclude : config.getExcludePaths()) {

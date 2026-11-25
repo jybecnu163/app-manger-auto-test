@@ -7,6 +7,8 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,10 +46,20 @@ public class ReplayRestTemplateInterceptor implements ClientHttpRequestIntercept
         String requestHash = MockSignature.of(method, url, maskedBody);
         MockResponseDTO rule = store.find(requestHash);
         if (rule == null) {
+            writeStatsHeaders();
             log.warn("Dry-Run Mock 未命中，已阻止真实调用：{} {}", method, url);
             throw new ReplayMockMissingException("外部调用 Mock 未命中：" + method + " " + url);
         }
+        writeStatsHeaders();
         log.info("Dry-Run Mock 命中：{} {} hash={}", method, url, requestHash);
         return new MockClientHttpResponse(rule);
+    }
+
+    private void writeStatsHeaders() {
+        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes
+                && attributes.getResponse() != null) {
+            attributes.getResponse().setHeader("X-App-Replay-Mock-Hits", String.valueOf(store.hits()));
+            attributes.getResponse().setHeader("X-App-Replay-Mock-Misses", String.valueOf(store.misses()));
+        }
     }
 }

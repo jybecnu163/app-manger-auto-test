@@ -155,7 +155,7 @@ public class AppRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
-    public org.springframework.beans.factory.config.BeanPostProcessor replayTaskDecoratorPostProcessor(
+    public static org.springframework.beans.factory.config.BeanPostProcessor replayTaskDecoratorPostProcessor(
             org.springframework.core.task.TaskDecorator replayTaskDecorator) {
         return new org.springframework.beans.factory.config.BeanPostProcessor() {
             @Override

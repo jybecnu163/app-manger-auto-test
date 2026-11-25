@@ -3,8 +3,10 @@ package com.example.appservice.server.controller;
 import com.example.appservice.common.dto.MockResponseDTO;
 import com.example.appservice.common.dto.Result;
 import com.example.appservice.server.entity.ApiInterface;
+import com.example.appservice.server.entity.ExternalCallRecord;
 import com.example.appservice.server.entity.TrafficRecord;
 import com.example.appservice.server.service.AppService;
+import com.example.appservice.server.service.ExternalCallRecordService;
 import com.example.appservice.server.service.MockResponseService;
 import com.example.appservice.server.service.TrafficRecordService;
 import com.example.appservice.server.service.TestProxyService;
@@ -42,6 +44,7 @@ public class AdminController {
     private final TestcaseService testcaseService;
     private final MockResponseService mockResponseService;
     private final TrafficRecordService trafficRecordService;
+    private final ExternalCallRecordService externalCallRecordService;
 
     @GetMapping("/apps")
     public Result<List<AppListItemVO>> apps() {
@@ -128,6 +131,11 @@ public class AdminController {
             @RequestParam(required = false) String traceId) {
         return Result.ok(trafficRecordService.list(appId, interfaceId, method, status, onlyFailures,
                 parseDateTime(startTime), parseDateTime(endTime), traceId));
+    }
+
+    @GetMapping("/apps/{appId}/external-call/records")
+    public Result<List<ExternalCallRecord>> externalCallRecords(@PathVariable String appId) {
+        return Result.ok(externalCallRecordService.listByApp(appId));
     }
 
     private LocalDateTime parseDateTime(String value) {

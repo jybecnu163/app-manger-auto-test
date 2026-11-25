@@ -153,6 +153,12 @@ public class TestProxyService {
         log.setCreatedAt(LocalDateTime.now());
         testLogMapper.insert(log);
 
+        if (dryRun && vo.getStatus() >= 400) {
+            String message = body.contains("Mock 未命中") || vo.getMockMisses() > 0
+                    ? "回放失败：外部调用 Mock 未命中，已阻止真实调用"
+                    : "回放失败：业务实例返回 " + vo.getStatus();
+            throw new IllegalStateException(message);
+        }
         return vo;
     }
 

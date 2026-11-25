@@ -10,12 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class ReplayFilter extends OncePerRequestFilter {
@@ -81,6 +83,8 @@ public class ReplayFilter extends OncePerRequestFilter {
             mockStore.reset();
             try {
                 executeWithRollback(request, response, filterChain, config);
+            } catch (ReplayMockMissingException e) {
+                writeMockMissingResponse(response);
             } finally {
                 response.setHeader("X-App-Replay-Mock-Hits", String.valueOf(mockStore.hits()));
                 response.setHeader("X-App-Replay-Mock-Misses", String.valueOf(mockStore.misses()));
@@ -173,6 +177,18 @@ public class ReplayFilter extends OncePerRequestFilter {
             return null;
         }
         return info;
+    }
+
+    private void writeMockMissingResponse(HttpServletResponse response) throws IOException {
+        if (response.isCommitted()) {
+            return;
+        }
+        response.resetBuffer();
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.getWriter().write(
+                "{\"code\":1,\"message\":\"回放失败：外部调用 Mock 未命中，已阻止真实调用\",\"data\":null}");
     }
 
     private void forbidden(HttpServletResponse response, String message) throws IOException {

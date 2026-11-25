@@ -1,6 +1,7 @@
 package com.example.appservice.sdk;
 
 import com.example.appservice.common.dto.MockResponseDTO;
+import com.example.appservice.common.dto.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -57,10 +58,11 @@ public class MockResponseStore {
                     + "?appId=" + URLEncoder.encode(appId, StandardCharsets.UTF_8);
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-App-Token", identity.token() == null ? "" : identity.token());
-            ResponseEntity<List<MockResponseDTO>> response = restTemplate.exchange(url, HttpMethod.GET,
-                    new HttpEntity<>(headers), new ParameterizedTypeReference<List<MockResponseDTO>>() {
+            ResponseEntity<Result<List<MockResponseDTO>>> response = restTemplate.exchange(url, HttpMethod.GET,
+                    new HttpEntity<>(headers), new ParameterizedTypeReference<Result<List<MockResponseDTO>>>() {
                     });
-            List<MockResponseDTO> body = response.getBody();
+            Result<List<MockResponseDTO>> payload = response.getBody();
+            List<MockResponseDTO> body = payload == null ? null : payload.getData();
             if (body != null) {
                 for (MockResponseDTO rule : body) {
                     if (rule != null && rule.isEnabled() && StringUtils.hasText(rule.getRequestHash())) {

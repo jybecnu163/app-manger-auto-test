@@ -39,6 +39,13 @@ public class ExternalCallRecordService {
         }
     }
 
+    public List<ExternalCallRecord> listByApp(String appId) {
+        return externalCallRecordMapper.selectList(new LambdaQueryWrapper<ExternalCallRecord>()
+                .eq(ExternalCallRecord::getAppId, appId)
+                .orderByDesc(ExternalCallRecord::getCreatedAt)
+                .last("limit 200"));
+    }
+
     private boolean duplicate(String appId, ExternalCallRecordDTO dto, LocalDateTime createdAt) {
         return externalCallRecordMapper.selectCount(new LambdaQueryWrapper<ExternalCallRecord>()
                 .eq(ExternalCallRecord::getAppId, appId)
