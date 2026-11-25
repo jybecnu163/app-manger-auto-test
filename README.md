@@ -171,6 +171,39 @@ app:
 
 管理端点击测试时，服务端只把请求转发到该系统已上报的在线实例地址（`advertiseIp:port`），不接受任意 URL。连接超时 3 秒，读取超时 10 秒，响应体超过 1MB 会被截断，每次调用会写入 `test_log` 表。
 
+## 流量录制与 Dry-Run 回放
+
+详情页第三个 Tab **流量录制** 展示已采集的入站流量，支持按接口、方法、状态码、时间范围、失败状态和 traceId 筛选；点击一行查看请求与响应详情，点击 **Dry-Run 回放** 会用原始请求真实调用业务实例。
+
+关键约定：
+
+- 三项开关 `traffic-record.enabled`、`external-call-record.enabled`、`replay.enabled` 默认均为 `false`，生产环境不要开启回放。
+- 回放 Header 由服务端 `app.replay.signature-secret` 签名，必须与 SDK 的 `app.registry.replay.signature-secret` 一致。
+- 回放请求携带 `X-App-Replay*` Header；SDK 校验签名、时间窗与 nonce。**回放开关关闭时收到回放 Header 直接返回 403**，不执行业务逻辑。
+- 回放期间外部 HTTP 调用由 Mock 接管；未命中 Mock 时抛出 `ReplayMockMissingException`，绝不回退真实外部调用。
+- 回放结果包含 `replayId`、`replayMode`、`dbRolledBack`、`mockHits`、`mockMisses`。统计查询使用 `GET /api/admin/interfaces/{interfaceId}/stats?replayMode=DRY_RUN`，与真实测试统计分开。
+
+相关接口：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/agent/traffic/records` | SDK 批量上报入站流量 |
+| POST | `/api/agent/external-call/records` | SDK 批量上报出站调用 |
+| GET | `/api/agent/mock-responses` | SDK 拉取已启用 Mock 规则 |
+| GET | `/api/admin/apps/{appId}/traffic/records` | 管理端查询录制流量 |
+| GET | `/api/admin/apps/{appId}/external-call/records` | 管理端查询出站调用 |
+| GET | `/api/admin/interfaces/{interfaceId}/mock-responses` | 查询接口的 Mock 规则 |
+| POST | `/api/admin/mock-responses` | 手工新增或从 `externalCallRecordId` 生成 Mock |
+| POST | `/api/admin/mock-responses/{id}/enabled?enabled=` | 启用/禁用 Mock 规则 |
+
+生成 Mock 并回放的步骤：
+
+1. 在业务系统正常调用一次含外部 HTTP 的写接口，SDK 上报入站流量与出站调用。
+2. 查询 `/api/admin/apps/{appId}/external-call/records`，取得对应调用记录 ID。
+3. `POST /api/admin/mock-responses`，Body 传 `{"appId":"...","externalCallRecordId":123}`。
+4. 在“流量录制”Tab 对这条流量点击 **Dry-Run 回放**，确认统计中 Mock 命中、`dbRolledBack=true`。
+5. 禁用该 Mock 后再次回放，应收到“回放失败：外部调用 Mock 未命中，已阻止真实调用”，且真实外部接口未被调用。
+
 ## 本地验证示例
 
 仓库内自带两个示例系统，用于验证注册、接口上报和测试转发：
@@ -178,7 +211,7 @@ app:
 | 模块 | 端口 | 系统名 | 主要接口 |
 |---|---|---|---|
 | `demo-product-service` | 8081 | `product-service` | `GET/POST /api/products/**`（含分类、库存、搜索） |
-| `demo-order-service` | 8082 | `order-service` | `GET/POST/DELETE /api/orders/**` |
+| `demo-order-service` | 8082 | `order-service` | `GET/POST/DELETE /api/orders/**`，新增 `POST /api/orders/dryrun-demo`（外部 HTTP + 写审计表） |
 
 启动顺序：
 
@@ -199,13 +232,22 @@ java -jar demo-order-service/target/demo-order-service-1.0.0.jar
 
 示例系统的 appid/token 直接写在各自的 `application.yml` 中，不再生成本地文件：
 
-- `product-service`：`APP-PRODUCT-DEMO-0001` / `product-demo-token`
-- `order-service`：`APP-ORDER-DEMO-0001` / `order-demo-token`
+- `product-service`：`APP0001` / `product-demo-token`
+- `order-service`：`APP0002` / `order-demo-token`
 
 两个示例系统首次启动时会调用 `/api/agent/register`，服务端按配置中的 appid 自动创建 `app` 记录，无需在 `schema.sql` 中预置数据。`advertise-ip` 固定为 `127.0.0.1`，确保管理服务端能转发到本地实例。
 
-## 当前范围
+## 当前范围与风险边界
 
-- 仅扫描 Spring MVC 路由，不含 Feign/Dubbo。
-- 未做注册密钥与管理端登录，建议在内网使用。
+- 仅扫描 Spring MVC 路由，不含 Feign/Dubbo；HTTP Mock 第一期仅覆盖 RestTemplate。
+- 未做管理端登录鉴权，建议在内网使用。
 - 管理页面使用原生 HTML + JS，无前端构建步骤。
+- 流量录制与回放三项开关默认关闭，生产环境不要开启 `replay.enabled`。
+- Dry-Run 只通过外层事务回滚实现，**不是影子库**；写入必须位于同一 DataSource / TransactionManager。
+- 多步骤业务链路（跨请求 Session）暂不支持。
+- MQ、Redis、文件系统 Mock 暂不支持。
+- Service 不应使用 `@Transactional(REQUIRES_NEW)`；SDK 启动时会扫描并告警，但其中的写入不会被回放事务回滚。
+- 异步线程中的数据库写入不在第一期保证范围内；`ReplayTaskDecorator` 只传播回放上下文。
+- 回放开关关闭时收到回放 Header 返回 403；签名密钥需与服务端保持一致。
+
+详细设计见 `docs/DESIGN_TRAFFIC_RECORDING_AND_DRYRUN_REPLAY.md`，任务拆解见 `docs/TASKS_TRAFFIC_RECORDING_AND_DRYRUN_REPLAY.md`。

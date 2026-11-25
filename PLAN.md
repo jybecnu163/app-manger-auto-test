@@ -152,3 +152,45 @@ flowchart TD
 - Feign/Dubbo 接口采集。
 - 客户端反向通道，支持内网无入站端口的系统。
 - Flyway 管理表结构版本。
+- 影子数据库与多步骤业务链路 Session。
+- MQ / Redis / 文件系统 Mock。
+
+## 12. 流量录制与 Dry-Run 回放（第一期）
+
+### 12.1 目标
+
+在真实调用业务接口的前提下，让写接口可以在测试环境“执行一次但不落库”，并让外部 HTTP 调用返回录制到的 Mock 响应。详细设计见 `docs/DESIGN_TRAFFIC_RECORDING_AND_DRYRUN_REPLAY.md`。
+
+### 12.2 新增表
+
+| 表 | 用途 |
+|---|---|
+| `traffic_record` | 入站 HTTP 流量采样结果 |
+| `external_call_record` | RestTemplate 出站调用记录，作为 Mock 数据来源 |
+| `mock_response` | Mock 规则，按 `requestHash` 匹配 |
+| `api_interface.write_operation` | 接口写操作标记 |
+| `test_log` 扩展 | `replay_id`、`replay_mode`、`db_rolled_back`、`mock_hits`、`mock_misses` |
+
+### 12.3 关键链路
+
+1. SDK `TrafficCaptureFilter` 采集入站请求/响应，按采样率、include/exclude、脱敏和截断规则写入有界队列。
+2. SDK `OutboundHttpRecordingInterceptor` 在正常模式记录 RestTemplate 出站调用。
+3. `TrafficReporter` 按 `batch-size` / `flush-interval` 批量上报；失败只记日志并丢弃该批，队列有界不会无限堆积。
+4. 管理端把流量关联到 `api_interface`，页面提供筛选、详情与 Dry-Run 入口。
+5. `TestProxyService` 生成 `replayId`、`timestamp`、`nonce` 和 HMAC 签名，携带 `X-App-Replay*` Header 真实调用业务实例。
+6. SDK `ReplayFilter` 校验签名、时间窗与 nonce，用 `TransactionTemplate` 包裹 Filter Chain 并在结束时设置 `rollbackOnly`。
+7. SDK `ReplayRestTemplateInterceptor` 回放时只返回 Mock 响应；未命中直接抛 `ReplayMockMissingException`，不发起真实调用。
+8. 回放结果写入 `TestResultVO` 与 `test_log`，统计按 `replayMode` 区分真实测试和 Dry-Run。
+
+### 12.4 风险边界
+
+- 仅事务回滚，不是影子库；写入必须在同一事务管理器内。
+- 多步骤链路暂不支持；异步线程数据库写入不在第一期保证范围。
+- MQ / Redis / 文件 Mock 暂不支持，HTTP Mock 仅覆盖 RestTemplate。
+- 生产环境默认关闭；回放开关关闭时收到回放 Header 返回 403。
+- `REQUIRES_NEW` 会脱离外层事务，Service 不应使用；SDK 启动时扫描并告警。
+- Mock 未命中必须失败，不能静默回退真实外部调用。
+
+### 12.5 联调验证
+
+demo-order-service 提供 `POST /api/orders/dryrun-demo`：内部调用 product-service 并写入 `demo_order_audit` 表。按 README 生成 Mock 并回放后，应确认：业务响应正常、`dbRolledBack=true`、Mock 命中数增加、审计表计数不变；禁用 Mock 后回放失败且真实外部接口未被调用。
