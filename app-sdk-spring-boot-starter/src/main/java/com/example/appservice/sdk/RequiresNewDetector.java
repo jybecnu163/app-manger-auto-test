@@ -1,0 +1,49 @@
+package com.example.appservice.sdk;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+
+public class RequiresNewDetector {
+
+    private static final Logger log = LoggerFactory.getLogger(RequiresNewDetector.class);
+
+    private final ApplicationContext applicationContext;
+
+    public RequiresNewDetector(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void detect() {
+        Set<String> reported = new HashSet<>();
+        for (String name : applicationContext.getBeanDefinitionNames()) {
+            try {
+                Object bean = applicationContext.getBean(name);
+                Class<?> type = ClassUtils.getUserClass(bean);
+                for (Method method : type.getMethods()) {
+                    Transactional tx = AnnotationUtils.findAnnotation(method, Transactional.class);
+                    if (tx == null || tx.propagation() != Propagation.REQUIRES_NEW) {
+                        continue;
+                    }
+                    String key = type.getName() + "#" + method.getName();
+                    if (reported.add(key)) {
+                        log.warn("Dry-Run 风险：{} 使用 @Transactional(REQUIRES_NEW)，其数据库写入不会被回放事务回滚", key);
+                    }
+                }
+            } catch (Exception ignored) {
+                // 部分 Bean 延迟初始化或不可达，跳过即可
+            }
+        }
+    }
+}

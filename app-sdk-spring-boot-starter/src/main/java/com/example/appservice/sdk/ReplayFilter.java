@@ -7,8 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,10 +31,13 @@ public class ReplayFilter extends OncePerRequestFilter {
 
     private final AppRegistryProperties properties;
     private final NonceCache nonceCache;
+    private final ObjectProvider<PlatformTransactionManager> transactionManagers;
 
-    public ReplayFilter(AppRegistryProperties properties, NonceCache nonceCache) {
+    public ReplayFilter(AppRegistryProperties properties, NonceCache nonceCache,
+                        ObjectProvider<PlatformTransactionManager> transactionManagers) {
         this.properties = properties;
         this.nonceCache = nonceCache;
+        this.transactionManagers = transactionManagers;
     }
 
     @Override
@@ -69,10 +75,73 @@ public class ReplayFilter extends OncePerRequestFilter {
 
             ReplayContext.set(info);
             log.info("进入 Dry-Run 回放，replayId={}, mode={}", info.getReplayId(), info.getReplayMode());
-            filterChain.doFilter(request, response);
+            executeWithRollback(request, response, filterChain, config);
         } finally {
             ReplayContext.clear();
         }
+    }
+
+    private void executeWithRollback(HttpServletRequest request, HttpServletResponse response,
+                                     FilterChain filterChain,
+                                     AppRegistryProperties.ReplayProperties config)
+            throws ServletException, IOException {
+        PlatformTransactionManager manager = transactionManagers.getIfAvailable();
+        if (manager == null) {
+            log.warn("未找到 PlatformTransactionManager，本次 Dry-Run 不保证数据库回滚");
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (!"rollback".equalsIgnoreCase(config.getDbStrategy())) {
+            log.warn("dbStrategy={}，本次 Dry-Run 不执行事务回滚", config.getDbStrategy());
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        response.setHeader("X-App-Replay-Rolled-Back", "true");
+        TransactionTemplate template = new TransactionTemplate(manager);
+        Throwable[] failure = new Throwable[1];
+        try {
+            template.execute(status -> {
+                try {
+                    filterChain.doFilter(request, response);
+                } catch (ServletException | IOException e) {
+                    failure[0] = e;
+                    throw new WrappedFilterException(e);
+                } catch (RuntimeException | Error e) {
+                    failure[0] = e;
+                    throw e;
+                } finally {
+                    status.setRollbackOnly();
+                }
+                return null;
+            });
+        } catch (WrappedFilterException e) {
+            failure[0] = e.getCause();
+        } catch (RuntimeException | Error e) {
+            if (failure[0] == null) {
+                failure[0] = e;
+            }
+        }
+        rethrow(failure[0]);
+    }
+
+    private void rethrow(Throwable failure) throws ServletException, IOException {
+        if (failure == null) {
+            return;
+        }
+        if (failure instanceof IOException) {
+            throw (IOException) failure;
+        }
+        if (failure instanceof ServletException) {
+            throw (ServletException) failure;
+        }
+        if (failure instanceof RuntimeException) {
+            throw (RuntimeException) failure;
+        }
+        if (failure instanceof Error) {
+            throw (Error) failure;
+        }
+        throw new ServletException(failure);
     }
 
     private ReplayInfo parseInfo(HttpServletRequest request) {
@@ -100,5 +169,11 @@ public class ReplayFilter extends OncePerRequestFilter {
     private void forbidden(HttpServletResponse response, String message) throws IOException {
         log.warn("拒绝回放请求：{}", message);
         response.sendError(HttpServletResponse.SC_FORBIDDEN, message);
+    }
+
+    private static class WrappedFilterException extends RuntimeException {
+        WrappedFilterException(Throwable cause) {
+            super(cause);
+        }
     }
 }

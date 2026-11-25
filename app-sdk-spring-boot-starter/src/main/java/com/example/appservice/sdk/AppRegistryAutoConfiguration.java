@@ -111,8 +111,16 @@ public class AppRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
-    public ReplayFilter replayFilter(AppRegistryProperties properties, NonceCache nonceCache) {
-        return new ReplayFilter(properties, nonceCache);
+    public ReplayFilter replayFilter(AppRegistryProperties properties, NonceCache nonceCache,
+                                     org.springframework.beans.factory.ObjectProvider<
+                                             org.springframework.transaction.PlatformTransactionManager> managers) {
+        return new ReplayFilter(properties, nonceCache, managers);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public RequiresNewDetector requiresNewDetector(org.springframework.context.ApplicationContext context) {
+        return new RequiresNewDetector(context);
     }
 
     @Bean
