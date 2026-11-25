@@ -101,4 +101,38 @@ public class AppRegistryAutoConfiguration {
                                            AppIdentityResolver identity) {
         return new TrafficReporter(properties, trafficBuffer, externalCallBuffer, identity);
     }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public NonceCache replayNonceCache(AppRegistryProperties properties) {
+        long ttl = properties.getReplay().getMaxTimestampSkew().toMillis() * 2;
+        return new NonceCache(ttl, 10000);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public ReplayFilter replayFilter(AppRegistryProperties properties, NonceCache nonceCache) {
+        return new ReplayFilter(properties, nonceCache);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public org.springframework.core.task.TaskDecorator replayTaskDecorator() {
+        return new ReplayTaskDecorator();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public org.springframework.beans.factory.config.BeanPostProcessor replayTaskDecoratorPostProcessor(
+            org.springframework.core.task.TaskDecorator replayTaskDecorator) {
+        return new org.springframework.beans.factory.config.BeanPostProcessor() {
+            @Override
+            public Object postProcessBeforeInitialization(Object bean, String beanName) {
+                if (bean instanceof org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor) {
+                    executor.setTaskDecorator(replayTaskDecorator);
+                }
+                return bean;
+            }
+        };
+    }
 }
