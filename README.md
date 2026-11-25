@@ -42,6 +42,26 @@ java -jar app-service-server/target/app-service-server-1.0.0.jar
 
 浏览器打开 `http://localhost:8080/` 即可看到系统列表。表结构由 `db/schema.sql` 在启动时自动创建。
 
+## 生成空壳业务系统
+
+系统列表页点击 **生成空壳系统**，填写系统名称、端口和环境即可下载一个可运行的 Spring Boot 项目压缩包。生成项目包含：
+
+- `GET /api/health` 健康检查接口
+- 已配置好的 SDK 依赖与 `app.registry.*` 配置
+- 自动生成的 appId 与 token
+- `README.md` 启动说明
+
+启动前先在项目根目录执行 `mvn install`，确保 SDK 依赖已安装到本地仓库。解压生成包后执行：
+
+```bash
+mvn clean package
+java -jar target/{系统名}-1.0.0.jar
+```
+
+启动后 SDK 会自动向当前管理端注册并上报心跳，系统列表会出现该服务，详情页可看到 `/api/health` 接口。
+
+设计说明见 [docs/DESIGN_SCAFFOLD_GENERATION.md](docs/DESIGN_SCAFFOLD_GENERATION.md)，任务拆解见 [docs/TASKS_SCAFFOLD_GENERATION.md](docs/TASKS_SCAFFOLD_GENERATION.md)。
+
 ## 业务系统接入
 
 在被管理的 Spring Boot 系统中引入 SDK：
