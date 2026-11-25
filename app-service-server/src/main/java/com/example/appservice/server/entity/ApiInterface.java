@@ -21,5 +21,6 @@ public class ApiInterface {
     private String requestSchema;
     private String responseSchema;
     private String schemaHash;
+    private boolean writeOperation;
     private LocalDateTime updatedAt;
 }

@@ -18,5 +18,10 @@ public class TestLog {
     private String requestSummary;
     private Integer responseStatus;
     private long costMs;
+    private String replayId;
+    private String replayMode = "NONE";
+    private boolean dbRolledBack;
+    private int mockHits;
+    private int mockMisses;
     private LocalDateTime createdAt;
 }
