@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>商品服务测试台</title>
+    <link rel="stylesheet" href="/css/app.css?v=20261125f">
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <h1>商品服务测试台</h1>
+        <nav>
+            <a href="http://localhost:8081/">商品服务</a>
+            <a href="http://localhost:8082/">订单服务</a>
+            <a href="http://localhost:8080/">管理端</a>
+        </nav>
+    </div>
+
+    <section class="card">
+        <h2>商品列表</h2>
+        <div class="toolbar">
+            <input id="listKeyword" placeholder="关键字" title="关键字">
+            <input id="listPage" type="number" value="1" min="1" title="页码">
+            <input id="listSize" type="number" value="10" min="1" title="每页条数">
+            <button id="loadList">查询列表</button>
+        </div>
+        <div class="toolbar">
+            <input id="searchKeyword" placeholder="关键字">
+            <select id="searchCategory"><option value="">全部分类</option></select>
+            <select id="searchStatus">
+                <option value="">全部状态</option>
+                <option value="DRAFT">DRAFT</option>
+                <option value="ON_SALE">ON_SALE</option>
+                <option value="OFF_SALE">OFF_SALE</option>
+            </select>
+            <input id="searchMinPrice" type="number" step="0.01" placeholder="最低价">
+            <input id="searchMaxPrice" type="number" step="0.01" placeholder="最高价">
+            <input id="searchPage" type="number" value="1" min="1" title="页码">
+            <input id="searchSize" type="number" value="10" min="1" title="每页条数">
+            <button id="advancedSearch" class="secondary">组合搜索</button>
+        </div>
+        <p id="listMeta" class="muted">尚未查询。</p>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>名称</th><th>价格</th><th>库存</th><th>分类</th><th>状态</th><th>操作</th></tr>
+            </thead>
+            <tbody id="listBody"><tr><td colspan="7" class="muted">暂无数据</td></tr></tbody>
+        </table>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>新建商品</h2>
+            <div class="field"><label>名称</label><input id="newName" placeholder="商品名称"></div>
+            <div class="field"><label>价格</label><input id="newPrice" type="number" step="0.01" value="99.00"></div>
+            <div class="field"><label>库存</label><input id="newStock" type="number" value="100"></div>
+            <div class="field"><label>分类</label><input id="newCategory" list="categoryOptions" placeholder="数码"><datalist id="categoryOptions"></datalist></div>
+            <div class="field"><label>状态</label><select id="newStatus">
+                <option value="DRAFT">DRAFT</option><option value="ON_SALE" selected>ON_SALE</option><option value="OFF_SALE">OFF_SALE</option>
+            </select></div>
+            <button id="createProduct">创建商品</button>
+            <pre id="createResult" class="result"></pre>
+        </section>
+
+        <section class="card">
+            <h2>详情与库存</h2>
+            <div class="field"><label>商品 ID</label><input id="productId" type="number" value="1"></div>
+            <div class="toolbar">
+                <button id="getProduct">查询详情</button>
+                <button id="getStock" class="secondary">查询库存</button>
+            </div>
+            <div class="field"><label>库存变化量</label><input id="stockChange" type="number" value="10"></div>
+            <div class="field"><label>调整原因</label><input id="stockReason" placeholder="盘点入库"></div>
+            <button id="adjustStock" class="secondary">调整库存</button>
+            <pre id="productResult" class="result"></pre>
+        </section>
+    </div>
+</div>
+<script src="/js/app.js?v=20261125f"></script>
+</body>
+</html>

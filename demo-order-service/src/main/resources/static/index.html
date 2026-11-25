@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>订单服务测试台</title>
+    <link rel="stylesheet" href="/css/app.css?v=20261125f">
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <h1>订单服务测试台</h1>
+        <nav>
+            <a href="http://localhost:8081/">商品服务</a>
+            <a href="http://localhost:8082/">订单服务</a>
+            <a href="http://localhost:8080/">管理端</a>
+        </nav>
+    </div>
+
+    <section class="card">
+        <h2>订单列表</h2>
+        <div class="toolbar">
+            <input id="listCustomer" placeholder="客户 ID">
+            <select id="listStatus">
+                <option value="">全部状态</option>
+                <option value="CREATED">CREATED</option>
+                <option value="PAID">PAID</option>
+                <option value="SHIPPED">SHIPPED</option>
+                <option value="CANCELLED">CANCELLED</option>
+            </select>
+            <input id="listPage" type="number" value="1" min="1" title="页码">
+            <input id="listSize" type="number" value="10" min="1" title="每页条数">
+            <button id="loadList">查询列表</button>
+        </div>
+        <p id="listMeta" class="muted">尚未查询。</p>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>订单号</th><th>客户</th><th>状态</th><th>金额</th><th>地址</th><th>操作</th></tr>
+            </thead>
+            <tbody id="listBody"><tr><td colspan="7" class="muted">暂无数据</td></tr></tbody>
+        </table>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>新建订单</h2>
+            <div class="field"><label>客户 ID</label><input id="newCustomer" placeholder="C001"></div>
+            <div class="field"><label>收货地址</label><input id="newAddress" placeholder="深圳市南山区"></div>
+            <div class="field"><label>订单明细</label></div>
+            <div class="item-row header"><span>商品ID</span><span>商品名称</span><span>数量</span><span>单价</span><span></span></div>
+            <div id="items"></div>
+            <div class="toolbar"><button id="addItem" class="secondary">添加明细</button></div>
+            <button id="createOrder">创建订单</button>
+            <pre id="createResult" class="result"></pre>
+        </section>
+
+        <section class="card">
+            <h2>订单详情与操作</h2>
+            <div class="field"><label>订单 ID</label><input id="orderId" type="number" value="1"></div>
+            <div class="toolbar">
+                <button id="getOrder">查询详情</button>
+                <button id="cancelOrder" class="secondary">取消订单</button>
+                <button id="deleteOrder" class="danger">删除订单</button>
+            </div>
+            <div class="field"><label>支付方式</label><input id="payMethod" placeholder="ALIPAY"></div>
+            <button id="payOrder" class="secondary">支付订单</button>
+            <pre id="orderResult" class="result"></pre>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>Dry-Run 联调</h2>
+        <p class="muted">该接口会调用商品服务并写入一条审计记录；管理端 Dry-Run 回放时应返回 Mock 数据并回滚审计写入。</p>
+        <div class="toolbar">
+            <input id="dryRunOrderId" type="number" value="1" title="订单 ID">
+            <button id="runDryRun">执行 dryrun-demo</button>
+            <button id="loadAuditCount" class="secondary">查询审计计数</button>
+        </div>
+        <pre id="dryRunResult" class="result"></pre>
+        <div id="auditCountText" class="audit-count"></div>
+    </section>
+</div>
+<script src="/js/app.js?v=20261125f"></script>
+</body>
+</html>
