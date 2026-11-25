@@ -163,13 +163,13 @@ flowchart TD
 
 ### 12.2 新增表
 
-| 表 | 用途 |
-|---|---|
-| `traffic_record` | 入站 HTTP 流量采样结果 |
-| `external_call_record` | RestTemplate 出站调用记录，作为 Mock 数据来源 |
-| `mock_response` | Mock 规则，按 `requestHash` 匹配 |
-| `api_interface.write_operation` | 接口写操作标记 |
-| `test_log` 扩展 | `replay_id`、`replay_mode`、`db_rolled_back`、`mock_hits`、`mock_misses` |
+| 表                               | 用途                                                                   |
+|---------------------------------|----------------------------------------------------------------------|
+| `traffic_record`                | 入站 HTTP 流量采样结果                                                       |
+| `external_call_record`          | RestTemplate 出站调用记录，作为 Mock 数据来源                                     |
+| `mock_response`                 | Mock 规则，按 `requestHash` 匹配                                           |
+| `api_interface.write_operation` | 接口写操作标记                                                              |
+| `test_log` 扩展                   | `replay_id`、`replay_mode`、`db_rolled_back`、`mock_hits`、`mock_misses` |
 
 ### 12.3 关键链路
 

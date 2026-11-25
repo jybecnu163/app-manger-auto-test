@@ -185,16 +185,16 @@ app:
 
 相关接口：
 
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| POST | `/api/agent/traffic/records` | SDK 批量上报入站流量 |
-| POST | `/api/agent/external-call/records` | SDK 批量上报出站调用 |
-| GET | `/api/agent/mock-responses` | SDK 拉取已启用 Mock 规则 |
-| GET | `/api/admin/apps/{appId}/traffic/records` | 管理端查询录制流量 |
-| GET | `/api/admin/apps/{appId}/external-call/records` | 管理端查询出站调用 |
-| GET | `/api/admin/interfaces/{interfaceId}/mock-responses` | 查询接口的 Mock 规则 |
-| POST | `/api/admin/mock-responses` | 手工新增或从 `externalCallRecordId` 生成 Mock |
-| POST | `/api/admin/mock-responses/{id}/enabled?enabled=` | 启用/禁用 Mock 规则 |
+| 方法   | 路径                                                   | 说明                                    |
+|------|------------------------------------------------------|---------------------------------------|
+| POST | `/api/agent/traffic/records`                         | SDK 批量上报入站流量                          |
+| POST | `/api/agent/external-call/records`                   | SDK 批量上报出站调用                          |
+| GET  | `/api/agent/mock-responses`                          | SDK 拉取已启用 Mock 规则                     |
+| GET  | `/api/admin/apps/{appId}/traffic/records`            | 管理端查询录制流量                             |
+| GET  | `/api/admin/apps/{appId}/external-call/records`      | 管理端查询出站调用                             |
+| GET  | `/api/admin/interfaces/{interfaceId}/mock-responses` | 查询接口的 Mock 规则                         |
+| POST | `/api/admin/mock-responses`                          | 手工新增或从 `externalCallRecordId` 生成 Mock |
+| POST | `/api/admin/mock-responses/{id}/enabled?enabled=`    | 启用/禁用 Mock 规则                         |
 
 生成 Mock 并回放的步骤：
 
