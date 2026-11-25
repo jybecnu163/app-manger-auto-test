@@ -46,6 +46,23 @@ public class TrafficRecordService {
         }
     }
 
+    public List<TrafficRecord> list(String appId, Long interfaceId, String method, Integer status,
+                                    boolean onlyFailures, LocalDateTime start, LocalDateTime end,
+                                    String traceId) {
+        LambdaQueryWrapper<TrafficRecord> query = new LambdaQueryWrapper<TrafficRecord>()
+                .eq(TrafficRecord::getAppId, appId)
+                .eq(interfaceId != null, TrafficRecord::getInterfaceId, interfaceId)
+                .eq(StringUtils.hasText(method), TrafficRecord::getMethod, method)
+                .eq(status != null, TrafficRecord::getResponseStatus, status)
+                .eq(onlyFailures, TrafficRecord::isSuccess, false)
+                .ge(start != null, TrafficRecord::getCreatedAt, start)
+                .le(end != null, TrafficRecord::getCreatedAt, end)
+                .like(StringUtils.hasText(traceId), TrafficRecord::getTraceId, traceId)
+                .orderByDesc(TrafficRecord::getCreatedAt)
+                .last("limit 500");
+        return trafficRecordMapper.selectList(query);
+    }
+
     public Long findInterfaceId(String appId, String method, String path) {
         ApiInterface apiInterface = interfaceMapper.selectOne(new LambdaQueryWrapper<ApiInterface>()
                 .eq(ApiInterface::getAppId, appId)

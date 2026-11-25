@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>系统详情</title>
-    <link rel="stylesheet" href="/css/app.css?v=20261125d">
+    <link rel="stylesheet" href="/css/app.css?v=20261125e">
 </head>
 <body>
 <div class="container">
@@ -25,8 +25,9 @@
     <div class="tabs">
         <button id="tabInterfaces" class="tab active">接口列表</button>
         <button id="tabCases" class="tab">测试用例列表</button>
+        <button id="tabTraffic" class="tab">流量录制</button>
     </div>
-    <div class="split">
+    <div id="mainSplit" class="split">
         <div class="left-panel">
             <div id="interfaces" class="interface-list"></div>
             <div id="caseToolbar" class="case-toolbar" style="display:none">
@@ -39,8 +40,42 @@
             <p class="muted">请选择一个接口或测试用例。</p>
         </div>
     </div>
+
+    <div id="trafficPanel" class="traffic-panel" style="display:none">
+        <div class="traffic-filter">
+            <select id="trafficInterface"><option value="">全部接口</option></select>
+            <select id="trafficMethod">
+                <option value="">全部方法</option>
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+            <input id="trafficStatus" type="number" placeholder="状态码">
+            <input id="trafficTraceId" placeholder="traceId">
+            <input id="trafficStart" type="datetime-local" title="开始时间">
+            <input id="trafficEnd" type="datetime-local" title="结束时间">
+            <label><input id="trafficOnlyFailures" type="checkbox"> 只看失败</label>
+            <button id="trafficQuery">查询</button>
+            <button id="trafficReset" class="secondary">重置</button>
+        </div>
+        <table class="traffic-table">
+            <thead>
+            <tr>
+                <th>时间</th><th>方法</th><th>路径</th><th>接口ID</th><th>状态</th>
+                <th>结果</th><th>耗时</th><th>traceId</th><th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="trafficTableBody"></tbody>
+        </table>
+        <div id="trafficDetail" class="card">
+            <p class="muted">请点击一行查看请求与响应详情。</p>
+        </div>
+        <div id="replayResult" class="response-box"></div>
+    </div>
 </div>
-<script src="/js/common.js?v=20261125d"></script>
-<script src="/js/test.js?v=20261125d"></script>
+<script src="/js/common.js?v=20261125e"></script>
+<script src="/js/test.js?v=20261125e"></script>
+<script src="/js/traffic.js?v=20261125e"></script>
 </body>
 </html>

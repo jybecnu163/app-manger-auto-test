@@ -3,8 +3,10 @@ package com.example.appservice.server.controller;
 import com.example.appservice.common.dto.MockResponseDTO;
 import com.example.appservice.common.dto.Result;
 import com.example.appservice.server.entity.ApiInterface;
+import com.example.appservice.server.entity.TrafficRecord;
 import com.example.appservice.server.service.AppService;
 import com.example.appservice.server.service.MockResponseService;
+import com.example.appservice.server.service.TrafficRecordService;
 import com.example.appservice.server.service.TestProxyService;
 import com.example.appservice.server.service.TestcaseService;
 import com.example.appservice.server.vo.AppDetailVO;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -37,6 +41,7 @@ public class AdminController {
     private final TestProxyService testProxyService;
     private final TestcaseService testcaseService;
     private final MockResponseService mockResponseService;
+    private final TrafficRecordService trafficRecordService;
 
     @GetMapping("/apps")
     public Result<List<AppListItemVO>> apps() {
@@ -108,5 +113,30 @@ public class AdminController {
     public Result<Void> setMockEnabled(@PathVariable Long id, @RequestParam boolean enabled) {
         mockResponseService.setEnabled(id, enabled);
         return Result.<Void>ok(null);
+    }
+
+    @GetMapping("/apps/{appId}/traffic/records")
+    public Result<List<TrafficRecord>> trafficRecords(
+            @PathVariable String appId,
+            @RequestParam(required = false) Long interfaceId,
+            @RequestParam(required = false) String method,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false, defaultValue = "false") boolean onlyFailures,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String traceId) {
+        return Result.ok(trafficRecordService.list(appId, interfaceId, method, status, onlyFailures,
+                parseDateTime(startTime), parseDateTime(endTime), traceId));
+    }
+
+    private LocalDateTime parseDateTime(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(value);
+        } catch (Exception ignored) {
+            return OffsetDateTime.parse(value).toLocalDateTime();
+        }
     }
 }

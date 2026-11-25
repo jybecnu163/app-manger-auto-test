@@ -50,6 +50,7 @@ async function init() {
 function bindTabs() {
     document.getElementById('tabInterfaces').onclick = () => switchTab('interfaces');
     document.getElementById('tabCases').onclick = () => switchTab('cases');
+    document.getElementById('tabTraffic').onclick = () => switchTab('traffic');
     const replayAllButton = document.getElementById('replayAllCases');
     if (replayAllButton) replayAllButton.onclick = replayAllCases;
 }
@@ -58,12 +59,18 @@ function switchTab(tab) {
     activeTab = tab;
     document.getElementById('tabInterfaces').classList.toggle('active', tab === 'interfaces');
     document.getElementById('tabCases').classList.toggle('active', tab === 'cases');
+    document.getElementById('tabTraffic').classList.toggle('active', tab === 'traffic');
+    document.getElementById('mainSplit').style.display = tab === 'traffic' ? 'none' : '';
     document.getElementById('interfaces').style.display = tab === 'interfaces' ? '' : 'none';
     const toolbar = document.getElementById('caseToolbar');
     if (toolbar) toolbar.style.display = tab === 'cases' ? '' : 'none';
     document.getElementById('caseList').style.display = tab === 'cases' ? '' : 'none';
+    document.getElementById('trafficPanel').style.display = tab === 'traffic' ? '' : 'none';
     if (tab === 'cases') {
         renderCaseList();
+    }
+    if (tab === 'traffic') {
+        loadTraffic();
     }
 }
 

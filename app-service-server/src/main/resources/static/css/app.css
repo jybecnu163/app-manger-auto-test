@@ -213,3 +213,23 @@ pre {
 .batch-table th, .batch-table td { font-size: 12px; padding: 7px 9px; }
 .batch-ok { color: #1a7f37; }
 .batch-fail { color: #d92b2b; }
+.traffic-panel { margin-top: 16px; }
+.traffic-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.traffic-filter select, .traffic-filter input {
+    padding: 6px 8px;
+    border: 1px solid #d0d3d8;
+    border-radius: 4px;
+    font-size: 13px;
+}
+.traffic-table { width: 100%; }
+.traffic-table th, .traffic-table td { font-size: 12px; padding: 7px 9px; }
+.traffic-path { max-width: 280px; word-break: break-all; }
+.traffic-trace { max-width: 140px; word-break: break-all; color: #8f959e; }
+.traffic-panel .card { margin-top: 12px; }
+.traffic-panel pre { max-height: 260px; overflow: auto; }
