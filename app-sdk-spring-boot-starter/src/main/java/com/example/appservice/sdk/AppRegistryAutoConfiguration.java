@@ -73,4 +73,24 @@ public class AppRegistryAutoConfiguration {
                                                      AppIdentityResolver identity) {
         return new TrafficCaptureFilter(properties, buffer, identity);
     }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.external-call-record", name = "enabled", havingValue = "true")
+    public ExternalCallRecordBuffer externalCallRecordBuffer(AppRegistryProperties properties) {
+        return new ExternalCallRecordBuffer(properties.getTrafficRecord().getQueueSize());
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.external-call-record", name = "enabled", havingValue = "true")
+    public OutboundHttpRecordingInterceptor outboundHttpRecordingInterceptor(
+            AppRegistryProperties properties, ExternalCallRecordBuffer buffer, AppIdentityResolver identity) {
+        return new OutboundHttpRecordingInterceptor(properties, buffer, identity);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.external-call-record", name = "enabled", havingValue = "true")
+    public org.springframework.boot.web.client.RestTemplateCustomizer recordingRestTemplateCustomizer(
+            OutboundHttpRecordingInterceptor interceptor) {
+        return restTemplate -> restTemplate.getInterceptors().add(interceptor);
+    }
 }
