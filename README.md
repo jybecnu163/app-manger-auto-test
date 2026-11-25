@@ -91,6 +91,59 @@ app:
 
 开启后，SDK 会通过 AOP + 反射记录所有 `@RestController` 方法的入参、返回值和耗时，日志前缀为 `[CTRL-IN]`、`[CTRL-OUT]`、`[CTRL-ERR]`。`ServletRequest`、`ServletResponse`、`HttpSession` 只记录类名，避免打印大对象。
 
+### 流量录制与 Dry-Run 回放配置
+
+以下能力全部默认关闭，仅建议在测试环境按需要开启：
+
+```yaml
+app:
+  registry:
+    traffic-record:
+      enabled: false
+      sample-rate: 0.05
+      only-errors: false
+      include-paths:
+        - /api/**
+      exclude-paths:
+        - /actuator/**
+        - /error
+      max-body-bytes: 4096
+      mask-headers:
+        - Authorization
+        - Cookie
+        - Set-Cookie
+        - X-Token
+      mask-fields:
+        - password
+        - token
+        - phone
+        - idCard
+      batch-size: 100
+      flush-interval: 5s
+      queue-size: 10000
+    external-call-record:
+      enabled: false
+      max-body-bytes: 4096
+      mask-headers:
+        - Authorization
+        - Cookie
+        - Set-Cookie
+        - X-Token
+      mask-fields:
+        - password
+        - token
+    replay:
+      enabled: false
+      db-strategy: rollback
+      mock-missing-policy: fail
+      signature-enabled: true
+      max-timestamp-skew: 5m
+      signature-secret: app-service-replay-secret
+      mock-response-path: /api/agent/mock-responses
+```
+
+`traffic-record.enabled` 与 `external-call-record.enabled` 控制是否采集入站/出站流量；`replay.enabled` 控制是否接受管理端下发的 Dry-Run 回放请求。三者互不影响，未配置时均为 `false`。
+
 ## 接口测试表单与用例
 
 管理端详情页左侧有两个 Tab：
