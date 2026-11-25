@@ -93,4 +93,12 @@ public class AppRegistryAutoConfiguration {
             OutboundHttpRecordingInterceptor interceptor) {
         return restTemplate -> restTemplate.getInterceptors().add(interceptor);
     }
+
+    @Bean
+    public TrafficReporter trafficReporter(AppRegistryProperties properties,
+                                           ObjectProvider<TrafficRecordBuffer> trafficBuffer,
+                                           ObjectProvider<ExternalCallRecordBuffer> externalCallBuffer,
+                                           AppIdentityResolver identity) {
+        return new TrafficReporter(properties, trafficBuffer, externalCallBuffer, identity);
+    }
 }
