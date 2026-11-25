@@ -53,4 +53,24 @@ public class AppRegistryAutoConfiguration {
                                                  Environment environment) {
         return new HeartbeatScheduler(properties, client, scanner, fileStore, environment);
     }
+
+    @Bean
+    public AppIdentityResolver appIdentityResolver(AppRegistryProperties properties,
+                                                   AppIdFileStore fileStore) {
+        return new AppIdentityResolver(properties, fileStore);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.traffic-record", name = "enabled", havingValue = "true")
+    public TrafficRecordBuffer trafficRecordBuffer(AppRegistryProperties properties) {
+        return new TrafficRecordBuffer(properties.getTrafficRecord().getQueueSize());
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.traffic-record", name = "enabled", havingValue = "true")
+    public TrafficCaptureFilter trafficCaptureFilter(AppRegistryProperties properties,
+                                                     TrafficRecordBuffer buffer,
+                                                     AppIdentityResolver identity) {
+        return new TrafficCaptureFilter(properties, buffer, identity);
+    }
 }
