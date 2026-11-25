@@ -86,6 +86,19 @@ public class AppService {
         return response;
     }
 
+    public App authenticate(String appId, String token) {
+        App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
+                .eq(App::getAppId, appId)
+                .last("limit 1"));
+        if (app == null) {
+            throw new IllegalArgumentException("app not found: " + appId);
+        }
+        if (!app.getToken().equals(token)) {
+            throw new IllegalArgumentException("invalid token for app: " + appId);
+        }
+        return app;
+    }
+
     @Transactional
     public void heartbeat(HeartbeatRequest req) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
