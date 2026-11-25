@@ -12,4 +12,7 @@ public class TestRequest {
     private Map<String, String> queryParams;
     private Map<String, String> headers;
     private String body;
+    private String replayMode;
+    private Long trafficRecordId;
+    private String mockResponseId;
 }

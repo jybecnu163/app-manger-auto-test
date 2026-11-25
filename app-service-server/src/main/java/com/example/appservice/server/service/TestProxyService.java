@@ -3,11 +3,14 @@ package com.example.appservice.server.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.appservice.common.dto.ReplayMode;
 import com.example.appservice.server.entity.ApiInterface;
 import com.example.appservice.server.entity.AppInstance;
 import com.example.appservice.server.entity.TestLog;
+import com.example.appservice.server.entity.TrafficRecord;
 import com.example.appservice.server.mapper.ApiInterfaceMapper;
 import com.example.appservice.server.mapper.TestLogMapper;
+import com.example.appservice.server.mapper.TrafficRecordMapper;
 import com.example.appservice.server.vo.BatchCaseResultVO;
 import com.example.appservice.server.vo.BatchReplayResultVO;
 import com.example.appservice.server.vo.TestCaseVO;
@@ -21,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
@@ -30,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class TestProxyService {
@@ -41,18 +46,24 @@ public class TestProxyService {
     private final TestLogMapper testLogMapper;
     private final TestcaseService testcaseService;
     private final RestTemplate restTemplate;
+    private final ReplayHeaderService replayHeaderService;
+    private final TrafficRecordMapper trafficRecordMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TestProxyService(ApiInterfaceMapper interfaceMapper,
                             AppService appService,
                             TestLogMapper testLogMapper,
                             TestcaseService testcaseService,
-                            @Qualifier("proxyRestTemplate") RestTemplate restTemplate) {
+                            @Qualifier("proxyRestTemplate") RestTemplate restTemplate,
+                            ReplayHeaderService replayHeaderService,
+                            TrafficRecordMapper trafficRecordMapper) {
         this.interfaceMapper = interfaceMapper;
         this.appService = appService;
         this.testLogMapper = testLogMapper;
         this.testcaseService = testcaseService;
         this.restTemplate = restTemplate;
+        this.replayHeaderService = replayHeaderService;
+        this.trafficRecordMapper = trafficRecordMapper;
     }
 
     public TestResultVO test(String appId, TestRequest req) {
@@ -65,22 +76,46 @@ public class TestProxyService {
             throw new IllegalStateException("no online instance for app: " + appId);
         }
 
+        boolean dryRun = "DRY_RUN".equalsIgnoreCase(req.getReplayMode());
+        TrafficRecord recorded = null;
+        if (dryRun && req.getTrafficRecordId() != null) {
+            recorded = trafficRecordMapper.selectById(req.getTrafficRecordId());
+            if (recorded == null || !appId.equals(recorded.getAppId())) {
+                throw new IllegalArgumentException("traffic record not found: " + req.getTrafficRecordId());
+            }
+        }
+
+        String targetPath = recorded == null ? api.getPath() : recorded.getPath();
+        Map<String, String> queryParams = recorded == null
+                ? req.getQueryParams() : parseMap(recorded.getQueryParams());
+        Map<String, String> requestHeaders = recorded == null
+                ? req.getHeaders() : parseMap(recorded.getHeaders());
+        String requestBody = recorded == null ? req.getBody() : recorded.getBody();
+
         String url = "http://" + instance.getIp() + ":" + instance.getPort()
-                + applyPathParams(api.getPath(), req.getPathParams())
-                + buildQuery(req.getQueryParams());
+                + applyPathParams(targetPath, recorded == null ? req.getPathParams() : null)
+                + buildQuery(queryParams);
 
         HttpHeaders headers = new HttpHeaders();
-        if (req.getHeaders() != null) {
-            req.getHeaders().forEach(headers::set);
+        if (requestHeaders != null) {
+            requestHeaders.forEach(headers::set);
         }
-        if (req.getBody() != null && !req.getBody().isBlank()) {
+        if (requestBody != null && !requestBody.isBlank()) {
             headers.setContentType(MediaType.APPLICATION_JSON);
         }
+        String replayId = null;
+        if (dryRun) {
+            replayId = replayHeaderService.newReplayId();
+            replayHeaderService.buildHeaders(replayId, System.currentTimeMillis(),
+                    UUID.randomUUID().toString()).forEach(headers::set);
+        }
 
-        HttpMethod method = HttpMethod.valueOf(api.getMethod().toUpperCase());
+        HttpMethod method = recorded != null && StringUtils.hasText(recorded.getMethod())
+                ? HttpMethod.valueOf(recorded.getMethod().toUpperCase())
+                : HttpMethod.valueOf(api.getMethod().toUpperCase());
         long start = System.currentTimeMillis();
         ResponseEntity<String> response = restTemplate.exchange(
-                url, method, new HttpEntity<>(req.getBody(), headers), String.class);
+                url, method, new HttpEntity<>(requestBody, headers), String.class);
         long cost = System.currentTimeMillis() - start;
 
         String body = response.getBody() == null ? "" : response.getBody();
@@ -95,6 +130,13 @@ public class TestProxyService {
         vo.setHeaders(responseHeaders);
         vo.setBody(body);
         vo.setCostMs(cost);
+        if (dryRun) {
+            vo.setReplayId(replayId);
+            vo.setReplayMode(ReplayMode.DRY_RUN);
+            vo.setDbRolledBack(Boolean.parseBoolean(responseHeader(response, "X-App-Replay-Rolled-Back")));
+            vo.setMockHits(parseIntHeader(response, "X-App-Replay-Mock-Hits"));
+            vo.setMockMisses(parseIntHeader(response, "X-App-Replay-Mock-Misses"));
+        }
 
         TestLog log = new TestLog();
         log.setAppId(appId);
@@ -239,6 +281,19 @@ public class TestProxyService {
         stats.setMinCostMs(min == Long.MAX_VALUE ? 0 : min);
         stats.setLastTestAt(last);
         return stats;
+    }
+
+    private String responseHeader(ResponseEntity<String> response, String name) {
+        java.util.List<String> values = response.getHeaders().get(name);
+        return values == null || values.isEmpty() ? null : values.get(0);
+    }
+
+    private int parseIntHeader(ResponseEntity<String> response, String name) {
+        try {
+            return Integer.parseInt(responseHeader(response, name));
+        } catch (Exception ignored) {
+            return 0;
+        }
     }
 
     private String applyPathParams(String path, Map<String, String> pathParams) {

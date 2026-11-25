@@ -14,6 +14,10 @@ spring:
       mode: always
       schema-locations: classpath:db/schema.sql
 
+app:
+  replay:
+    signature-secret: app-service-replay-secret
+
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
