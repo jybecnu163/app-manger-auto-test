@@ -32,12 +32,15 @@ public class ReplayFilter extends OncePerRequestFilter {
     private final AppRegistryProperties properties;
     private final NonceCache nonceCache;
     private final ObjectProvider<PlatformTransactionManager> transactionManagers;
+    private final MockResponseStore mockStore;
 
     public ReplayFilter(AppRegistryProperties properties, NonceCache nonceCache,
-                        ObjectProvider<PlatformTransactionManager> transactionManagers) {
+                        ObjectProvider<PlatformTransactionManager> transactionManagers,
+                        MockResponseStore mockStore) {
         this.properties = properties;
         this.nonceCache = nonceCache;
         this.transactionManagers = transactionManagers;
+        this.mockStore = mockStore;
     }
 
     @Override
@@ -75,7 +78,13 @@ public class ReplayFilter extends OncePerRequestFilter {
 
             ReplayContext.set(info);
             log.info("进入 Dry-Run 回放，replayId={}, mode={}", info.getReplayId(), info.getReplayMode());
-            executeWithRollback(request, response, filterChain, config);
+            mockStore.reset();
+            try {
+                executeWithRollback(request, response, filterChain, config);
+            } finally {
+                response.setHeader("X-App-Replay-Mock-Hits", String.valueOf(mockStore.hits()));
+                response.setHeader("X-App-Replay-Mock-Misses", String.valueOf(mockStore.misses()));
+            }
         } finally {
             ReplayContext.clear();
         }

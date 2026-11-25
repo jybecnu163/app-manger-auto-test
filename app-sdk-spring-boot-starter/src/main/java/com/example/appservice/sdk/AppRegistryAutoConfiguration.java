@@ -89,6 +89,7 @@ public class AppRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.external-call-record", name = "enabled", havingValue = "true")
+    @org.springframework.core.annotation.Order(org.springframework.core.Ordered.LOWEST_PRECEDENCE)
     public org.springframework.boot.web.client.RestTemplateCustomizer recordingRestTemplateCustomizer(
             OutboundHttpRecordingInterceptor interceptor) {
         return restTemplate -> restTemplate.getInterceptors().add(interceptor);
@@ -111,10 +112,33 @@ public class AppRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public MockResponseStore mockResponseStore(AppRegistryProperties properties,
+                                               AppIdentityResolver identity) {
+        return new MockResponseStore(properties, identity);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    public ReplayRestTemplateInterceptor replayRestTemplateInterceptor(
+            AppRegistryProperties properties, MockResponseStore store, AppIdentityResolver identity) {
+        return new ReplayRestTemplateInterceptor(properties, store, identity);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
+    @org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
+    public org.springframework.boot.web.client.RestTemplateCustomizer replayRestTemplateCustomizer(
+            ReplayRestTemplateInterceptor interceptor) {
+        return restTemplate -> restTemplate.getInterceptors().add(interceptor);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
     public ReplayFilter replayFilter(AppRegistryProperties properties, NonceCache nonceCache,
                                      org.springframework.beans.factory.ObjectProvider<
-                                             org.springframework.transaction.PlatformTransactionManager> managers) {
-        return new ReplayFilter(properties, nonceCache, managers);
+                                             org.springframework.transaction.PlatformTransactionManager> managers,
+                                     MockResponseStore mockStore) {
+        return new ReplayFilter(properties, nonceCache, managers, mockStore);
     }
 
     @Bean
