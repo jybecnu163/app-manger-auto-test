@@ -1,13 +1,16 @@
 package com.example.appservice.server.controller;
 
+import com.example.appservice.common.dto.MockResponseDTO;
 import com.example.appservice.common.dto.Result;
 import com.example.appservice.server.entity.ApiInterface;
 import com.example.appservice.server.service.AppService;
+import com.example.appservice.server.service.MockResponseService;
 import com.example.appservice.server.service.TestProxyService;
 import com.example.appservice.server.service.TestcaseService;
 import com.example.appservice.server.vo.AppDetailVO;
 import com.example.appservice.server.vo.AppListItemVO;
 import com.example.appservice.server.vo.BatchReplayResultVO;
+import com.example.appservice.server.vo.MockResponseSaveRequest;
 import com.example.appservice.server.vo.TestCaseSaveRequest;
 import com.example.appservice.server.vo.TestCaseVO;
 import com.example.appservice.server.vo.TestRequest;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,6 +36,7 @@ public class AdminController {
     private final AppService appService;
     private final TestProxyService testProxyService;
     private final TestcaseService testcaseService;
+    private final MockResponseService mockResponseService;
 
     @GetMapping("/apps")
     public Result<List<AppListItemVO>> apps() {
@@ -85,6 +90,23 @@ public class AdminController {
                                    @PathVariable Long interfaceId,
                                    @PathVariable Long caseId) {
         testcaseService.delete(interfaceId, caseId);
+        return Result.<Void>ok(null);
+    }
+
+    @GetMapping("/interfaces/{interfaceId}/mock-responses")
+    public Result<List<MockResponseDTO>> mockResponses(@PathVariable Long interfaceId,
+                                                       @RequestParam(required = false) String appId) {
+        return Result.ok(mockResponseService.listByInterface(appId, interfaceId));
+    }
+
+    @PostMapping("/mock-responses")
+    public Result<MockResponseDTO> saveMockResponse(@RequestBody MockResponseSaveRequest request) {
+        return Result.ok(mockResponseService.create(request));
+    }
+
+    @PostMapping("/mock-responses/{id}/enabled")
+    public Result<Void> setMockEnabled(@PathVariable Long id, @RequestParam boolean enabled) {
+        mockResponseService.setEnabled(id, enabled);
         return Result.<Void>ok(null);
     }
 }
