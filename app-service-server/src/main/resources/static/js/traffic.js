@@ -38,11 +38,63 @@ async function loadTraffic() {
     }
 }
 
+function recordingState(app) {
+    if (!app || !app.trafficRecordEnabled) {
+        return '已停止';
+    }
+    if (app.trafficRecordStartAt && new Date(app.trafficRecordStartAt).getTime() > Date.now()) {
+        return '待开始';
+    }
+    return '录制中';
+}
+
+async function loadRecordingStatus() {
+    try {
+        const apps = await apiGet('/api/admin/apps');
+        const app = apps.find(item => item.appId === appId);
+        const state = recordingState(app);
+        const status = document.getElementById('trafficRecordStatus');
+        status.textContent = state;
+        status.className = state === '录制中' ? 'recording-on'
+            : state === '待开始' ? 'recording-pending' : 'recording-off';
+        document.getElementById('startRecording').disabled = state !== '已停止';
+        document.getElementById('stopRecording').disabled = state === '已停止';
+        document.getElementById('recordingStartAt').disabled = state !== '已停止';
+        if (app && app.trafficRecordStartAt && state !== '录制中') {
+            document.getElementById('recordingStartAt').value =
+                app.trafficRecordStartAt.substring(0, 16);
+        }
+    } catch (e) {
+        document.getElementById('trafficRecordStatus').textContent = '读取失败';
+    }
+}
+
+async function setRecording(enabled) {
+    const startAt = enabled ? document.getElementById('recordingStartAt').value : '';
+    const body = enabled && startAt ? { startAt } : {};
+    try {
+        await apiPost('/api/admin/apps/' + encodeURIComponent(appId)
+            + '/traffic-record/enabled?enabled=' + enabled, body);
+        if (!enabled) {
+            document.getElementById('recordingStartAt').value = '';
+        }
+        await loadRecordingStatus();
+        if (!enabled) {
+            await loadTraffic();
+        }
+    } catch (e) {
+        alert('设置录制状态失败：' + e.message);
+    }
+}
+
 function initTrafficFilters() {
     const select = document.getElementById('trafficInterface');
     select.innerHTML = '<option value="">全部接口</option>' + interfaces.map(api =>
         '<option value="' + api.id + '">' + escapeHtml(api.method + ' ' + api.path) + '</option>').join('');
     document.getElementById('trafficQuery').onclick = () => loadTraffic();
+    document.getElementById('startRecording').onclick = () => setRecording(true);
+    document.getElementById('stopRecording').onclick = () => setRecording(false);
+    loadRecordingStatus();
     document.getElementById('trafficReset').onclick = () => {
         ['trafficInterface', 'trafficMethod', 'trafficStatus', 'trafficTraceId',
             'trafficStart', 'trafficEnd'].forEach(id => { document.getElementById(id).value = ''; });

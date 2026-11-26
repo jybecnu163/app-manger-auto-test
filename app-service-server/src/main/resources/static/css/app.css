@@ -268,3 +268,17 @@ pre {
 }
 .hint { color: #8f959e; font-size: 12px; }
 .result { max-height: 160px; overflow: auto; }
+.record-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: #f7f9fc;
+    border: 1px solid #e5e6eb;
+    border-radius: 4px;
+}
+.record-control strong.recording-on { color: #1a7f37; }
+.record-control strong.recording-pending { color: #d46b08; }
+.record-control strong.recording-off { color: #8f959e; }

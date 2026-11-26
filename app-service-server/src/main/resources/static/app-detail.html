@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>系统详情</title>
-    <link rel="stylesheet" href="/css/app.css?v=20261125e">
+    <link rel="stylesheet" href="/css/app.css?v=20261126a">
 </head>
 <body>
 <div class="container">
@@ -42,6 +42,13 @@
     </div>
 
     <div id="trafficPanel" class="traffic-panel" style="display:none">
+        <div class="record-control">
+            <span>录制状态：<strong id="trafficRecordStatus">-</strong></span>
+            <input id="recordingStartAt" type="datetime-local" title="起始时间，为空表示立即开始">
+            <button id="startRecording">开始录制</button>
+            <button id="stopRecording" class="secondary">结束录制</button>
+            <span class="muted">起始时间为空表示立即开始；设置未来时间则到点自动开始</span>
+        </div>
         <div class="traffic-filter">
             <select id="trafficInterface"><option value="">全部接口</option></select>
             <select id="trafficMethod">
@@ -74,8 +81,8 @@
         <div id="replayResult" class="response-box"></div>
     </div>
 </div>
-<script src="/js/common.js?v=20261125e"></script>
-<script src="/js/test.js?v=20261125e"></script>
-<script src="/js/traffic.js?v=20261125e"></script>
+<script src="/js/common.js?v=20261126a"></script>
+<script src="/js/test.js?v=20261126a"></script>
+<script src="/js/traffic.js?v=20261126a"></script>
 </body>
 </html>
