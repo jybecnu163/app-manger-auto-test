@@ -227,6 +227,19 @@ pre {
     border-radius: 4px;
     font-size: 13px;
 }
+.traffic-batch-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    background: #e8f3ff;
+    border: 1px solid #b9d7ff;
+    border-radius: 4px;
+}
+.traffic-batch-bar button { padding: 6px 12px; }
+.traffic-batch-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
 .traffic-table { width: 100%; }
 .traffic-table th, .traffic-table td { font-size: 12px; padding: 7px 9px; }
 .traffic-path { max-width: 280px; word-break: break-all; }
