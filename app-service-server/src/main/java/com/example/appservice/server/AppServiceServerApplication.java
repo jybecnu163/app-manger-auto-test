@@ -14,14 +14,23 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
+/**
+ * 管理服务启动类，同时提供分页插件与回放专用 RestTemplate 配置。
+ */
 @SpringBootApplication
 @MapperScan("com.example.appservice.server.mapper")
 public class AppServiceServerApplication {
 
+    /**
+     * 启动 app-service-server。
+     */
     public static void main(String[] args) {
         SpringApplication.run(AppServiceServerApplication.class, args);
     }
 
+    /**
+     * 注册 MyBatis-Plus 分页插件。
+     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -29,6 +38,9 @@ public class AppServiceServerApplication {
         return interceptor;
     }
 
+    /**
+     * 构造保留原始 4xx/5xx 响应的 RestTemplate，避免回放测试时抛出异常丢失响应体。
+     */
     @Bean("proxyRestTemplate")
     public RestTemplate proxyRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();

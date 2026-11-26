@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * 应用注册、鉴权、心跳、实例状态与接口元数据的核心服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AppService {
@@ -37,6 +40,9 @@ public class AppService {
     private final ApiInterfaceMapper interfaceMapper;
     private final TestcaseService testcaseService;
 
+    /**
+     * 按 appId 或 systemName+env 幂等注册应用并签发 token。
+     */
     @Transactional
     public RegisterResponse register(RegisterRequest req) {
         App app = null;
@@ -87,6 +93,9 @@ public class AppService {
         return response;
     }
 
+    /**
+     * 校验 appId 与 token，失败时拒绝 Agent 请求。
+     */
     public App authenticate(String appId, String token) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
                 .eq(App::getAppId, appId)
@@ -100,6 +109,9 @@ public class AppService {
         return app;
     }
 
+    /**
+     * 更新实例状态、按 interfacesHash 重建接口与自动用例，并下发录制开关。
+     */
     @Transactional
     public HeartbeatResponse heartbeat(HeartbeatRequest req) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
@@ -157,6 +169,9 @@ public class AppService {
         return response;
     }
 
+    /**
+     * 查询应用列表并统计在线实例数。
+     */
     public List<AppListItemVO> listApps() {
         List<AppListItemVO> result = new ArrayList<>();
         for (App app : appMapper.selectList(null)) {
@@ -182,6 +197,9 @@ public class AppService {
         return result;
     }
 
+    /**
+     * 查询应用详情及实例列表。
+     */
     public AppDetailVO detail(String appId) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
                 .eq(App::getAppId, appId)
@@ -205,6 +223,9 @@ public class AppService {
         return vo;
     }
 
+    /**
+     * 查询应用已上报接口。
+     */
     public List<ApiInterface> listInterfaces(String appId) {
         return interfaceMapper.selectList(new LambdaQueryWrapper<ApiInterface>()
                 .eq(ApiInterface::getAppId, appId)
@@ -213,6 +234,9 @@ public class AppService {
                 .orderByAsc(ApiInterface::getMethod));
     }
 
+    /**
+     * 查找最新在线实例作为测试/回放目标。
+     */
     public AppInstance findOnlineInstance(String appId) {
         refreshInstances(appId);
         return instanceMapper.selectOne(new LambdaQueryWrapper<AppInstance>()

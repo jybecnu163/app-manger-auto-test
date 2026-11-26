@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * 请求指纹计算工具，按 method、URL、规范化 query 和 body 生成 MD5，用于流量去重与 Mock 匹配。
+ */
 public final class RequestHashUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -19,6 +22,9 @@ public final class RequestHashUtil {
     private RequestHashUtil() {
     }
 
+    /**
+     * 计算请求指纹；query 会按 key 排序，URL 中的查询串会被剔除。
+     */
     public static String of(String method, String url, String queryParams, String body) {
         String normalizedMethod = method == null ? "" : method.trim().toUpperCase();
         int questionMark = url == null ? -1 : url.indexOf('?');

@@ -2,6 +2,9 @@ package com.example.appservice.sdk;
 
 import org.springframework.util.StringUtils;
 
+/**
+ * 解析 SDK 身份信息，优先使用配置值，其次回落到本地 appid 文件。
+ */
 public class AppIdentityResolver {
 
     private final AppRegistryProperties properties;
@@ -12,6 +15,9 @@ public class AppIdentityResolver {
         this.fileStore = fileStore;
     }
 
+    /**
+     * 返回当前应用 appId。
+     */
     public String appId() {
         if (StringUtils.hasText(properties.getAppid())) {
             return properties.getAppid();
@@ -20,6 +26,9 @@ public class AppIdentityResolver {
         return stored == null ? null : stored.getAppId();
     }
 
+    /**
+     * 返回当前应用 token。
+     */
     public String token() {
         if (StringUtils.hasText(properties.getToken())) {
             return properties.getToken();

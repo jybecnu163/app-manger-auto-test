@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 启动注册与定时心跳调度器，并同步服务端下发的录制状态。
+ */
 public class HeartbeatScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(HeartbeatScheduler.class);
@@ -51,6 +54,9 @@ public class HeartbeatScheduler {
         this.recorderSwitch = recorderSwitch;
     }
 
+    /**
+     * 应用就绪后执行首次注册与心跳。
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void onReady() {
         try {
@@ -65,6 +71,9 @@ public class HeartbeatScheduler {
 
     @Scheduled(initialDelayString = "#{@appRegistryProperties.heartbeatInterval.toMillis()}",
             fixedDelayString = "#{@appRegistryProperties.heartbeatInterval.toMillis()}")
+    /**
+     * 定时上报实例、接口和状态，失败时重置注册状态。
+     */
     public void heartbeat() {
         try {
             ensureInitialized();

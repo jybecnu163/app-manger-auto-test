@@ -14,10 +14,16 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
 
+/**
+ * 本地 appid 凭据文件存储，支持原子写入和权限收敛。
+ */
 public class AppIdFileStore {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * 根据配置解析凭据文件路径。
+     */
     public String resolvePath(AppRegistryProperties properties) {
         if (StringUtils.hasText(properties.getAppidFile())) {
             return properties.getAppidFile();
@@ -28,6 +34,9 @@ public class AppIdFileStore {
                 safeName + "-" + properties.getEnv() + ".appid").toString();
     }
 
+    /**
+     * 读取本地凭据文件。
+     */
     public StoredApp read(String path) {
         if (!StringUtils.hasText(path)) {
             return null;
@@ -43,6 +52,9 @@ public class AppIdFileStore {
         }
     }
 
+    /**
+     * 删除本地凭据文件。
+     */
     public void delete(String path) {
         if (!StringUtils.hasText(path)) {
             return;
@@ -54,6 +66,9 @@ public class AppIdFileStore {
         }
     }
 
+    /**
+     * 原子写入注册返回的 appId/token。
+     */
     public void write(String path, RegisterResponse response, String systemName, String env) throws IOException {
         Path target = Paths.get(path);
         Path parent = target.getParent();

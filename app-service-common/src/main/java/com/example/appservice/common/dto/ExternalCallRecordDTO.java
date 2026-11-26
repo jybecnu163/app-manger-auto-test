@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 单条出站 HTTP 调用录制记录，用于生成回放阶段的 Mock 规则。
+ */
 @Data
 public class ExternalCallRecordDTO {
 

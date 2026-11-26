@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 测试转发与 Dry-Run 回放核心服务，负责请求重写、签名头注入、结果统计和审计日志。
+ */
 @Service
 public class TestProxyService {
 
@@ -66,6 +69,9 @@ public class TestProxyService {
         this.trafficRecordMapper = trafficRecordMapper;
     }
 
+    /**
+     * 将请求转发到在线实例；DRY_RUN 模式使用录制流量覆盖参数并注入回放头。
+     */
     public TestResultVO test(String appId, TestRequest req) {
         ApiInterface api = interfaceMapper.selectById(req.getInterfaceId());
         if (api == null || !appId.equals(api.getAppId())) {
@@ -162,6 +168,9 @@ public class TestProxyService {
         return vo;
     }
 
+    /**
+     * 批量回放用例并汇总成功、失败、跳过与耗时分布。
+     */
     public BatchReplayResultVO replayAll(String appId) {
         List<TestCaseVO> cases = testcaseService.listByApp(appId);
         BatchReplayResultVO result = new BatchReplayResultVO();
@@ -259,6 +268,9 @@ public class TestProxyService {
         return text.length() > 120 ? text.substring(0, 120) + "..." : text;
     }
 
+    /**
+     * 按接口和回放模式统计测试日志。
+     */
     public TestStatsVO stats(Long interfaceId, String replayMode) {
         String mode = replayMode == null || replayMode.isBlank() ? "NONE" : replayMode.trim().toUpperCase();
         List<TestLog> logs = testLogMapper.selectList(new LambdaQueryWrapper<TestLog>()

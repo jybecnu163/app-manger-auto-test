@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Mock 规则管理服务，支持手工创建、一键生成与启停控制。
+ */
 @Service
 @RequiredArgsConstructor
 public class MockResponseService {
@@ -27,6 +30,9 @@ public class MockResponseService {
     private final ExternalCallRecordMapper externalCallRecordMapper;
     private final TrafficRecordMapper trafficRecordMapper;
 
+    /**
+     * 查询应用启用的 Mock 规则，供 SDK 拉取。
+     */
     public List<MockResponseDTO> listByApp(String appId) {
         return mockResponseMapper.selectList(new LambdaQueryWrapper<MockResponse>()
                         .eq(MockResponse::getAppId, appId)
@@ -34,6 +40,9 @@ public class MockResponseService {
                 .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * 按接口查询 Mock 规则。
+     */
     public List<MockResponseDTO> listByInterface(String appId, Long interfaceId) {
         LambdaQueryWrapper<MockResponse> query = new LambdaQueryWrapper<MockResponse>()
                 .eq(MockResponse::getInterfaceId, interfaceId);
@@ -44,6 +53,9 @@ public class MockResponseService {
                 .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * 手工创建精确匹配 Mock 规则。
+     */
     public MockResponseDTO create(MockResponseSaveRequest request) {
         if (request.getExternalCallRecordId() != null) {
             return generateFromExternalCall(request.getAppId(), request.getExternalCallRecordId());
@@ -66,6 +78,9 @@ public class MockResponseService {
         return toDTO(entity);
     }
 
+    /**
+     * 从外部调用记录生成 Mock 规则并关联接口。
+     */
     public MockResponseDTO generateFromExternalCall(String appId, Long externalCallRecordId) {
         ExternalCallRecord record = externalCallRecordMapper.selectById(externalCallRecordId);
         if (record == null) {
@@ -103,6 +118,9 @@ public class MockResponseService {
         return toDTO(entity);
     }
 
+    /**
+     * 启用或禁用 Mock 规则。
+     */
     public void setEnabled(Long id, boolean enabled) {
         MockResponse entity = mockResponseMapper.selectById(id);
         if (entity == null) {

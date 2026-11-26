@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * 管理端 HTTP 客户端，负责注册和心跳请求。
+ */
 public class AppRegistryClient {
 
     private final String serverUrl;
@@ -27,6 +30,9 @@ public class AppRegistryClient {
         this.restTemplate = new RestTemplate(factory);
     }
 
+    /**
+     * 调用 /api/agent/register 完成实例注册。
+     */
     public RegisterResponse register(RegisterRequest request) {
         Result<RegisterResponse> result = post("/api/agent/register", request,
                 new ParameterizedTypeReference<Result<RegisterResponse>>() {
@@ -34,6 +40,9 @@ public class AppRegistryClient {
         return unwrap(result);
     }
 
+    /**
+     * 调用 /api/agent/heartbeat 上报心跳并接收录制控制响应。
+     */
     public HeartbeatResponse heartbeat(HeartbeatRequest request) {
         Result<HeartbeatResponse> result = post("/api/agent/heartbeat", request,
                 new ParameterizedTypeReference<Result<HeartbeatResponse>>() {

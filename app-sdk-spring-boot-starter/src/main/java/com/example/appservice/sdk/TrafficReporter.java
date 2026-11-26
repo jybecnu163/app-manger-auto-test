@@ -18,6 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 定时批量上报入站流量与出站调用记录，带重试和停止保护。
+ */
 public class TrafficReporter {
 
     private static final Logger log = LoggerFactory.getLogger(TrafficReporter.class);
@@ -47,6 +50,9 @@ public class TrafficReporter {
 
     @Scheduled(initialDelayString = "#{@appRegistryProperties.trafficRecord.flushInterval.toMillis()}",
             fixedDelayString = "#{@appRegistryProperties.trafficRecord.flushInterval.toMillis()}")
+    /**
+     * 按批次上报两个缓冲队列中的记录。
+     */
     public void flush() {
         if (!running.get()) {
             return;
@@ -55,6 +61,9 @@ public class TrafficReporter {
         flushExternalCallRecords();
     }
 
+    /**
+     * 停止上报调度。
+     */
     @PreDestroy
     public void stop() {
         running.set(false);

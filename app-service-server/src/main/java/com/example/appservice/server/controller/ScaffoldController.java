@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+/**
+ * 空壳业务系统生成入口，返回 ZIP 下载并通过响应头携带生成的 appId/token。
+ */
 @RestController
 @RequestMapping("/api/admin/scaffolds")
 @RequiredArgsConstructor
@@ -23,6 +26,9 @@ public class ScaffoldController {
 
     private final ScaffoldService scaffoldService;
 
+    /**
+     * 根据请求生成 Spring Boot 空壳项目 ZIP。
+     */
     @PostMapping
     public ResponseEntity<byte[]> generate(@RequestBody ScaffoldRequest request) {
         if (!StringUtils.hasText(request.getServerUrl())) {

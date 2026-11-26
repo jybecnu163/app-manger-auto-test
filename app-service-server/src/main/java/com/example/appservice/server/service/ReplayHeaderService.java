@@ -10,6 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 回放安全头生成服务，负责生成 replayId 与 HMAC 签名的 X-App-Replay-* 头。
+ */
 @Service
 public class ReplayHeaderService {
 
@@ -22,11 +25,17 @@ public class ReplayHeaderService {
         this.signatureSecret = signatureSecret;
     }
 
+    /**
+     * 生成带时间戳和随机后缀的回放唯一标识。
+     */
     public String newReplayId() {
         return "RP-" + LocalDateTime.now().format(FORMATTER) + "-"
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
+    /**
+     * 构造回放身份、模式、时间戳、nonce 与签名 Header。
+     */
     public Map<String, String> buildHeaders(String replayId, long timestamp, String nonce) {
         String signature = ReplaySignatureCalculator.sign(signatureSecret, replayId, "DRY_RUN",
                 String.valueOf(timestamp), nonce);

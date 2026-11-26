@@ -24,6 +24,9 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * 入站流量采集过滤器，按开关、采样、路径规则和回放态决定是否录制请求与响应。
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
 public class TrafficCaptureFilter extends OncePerRequestFilter {
 
@@ -44,6 +47,9 @@ public class TrafficCaptureFilter extends OncePerRequestFilter {
         this.recorderSwitch = recorderSwitch;
     }
 
+    /**
+     * 缓存请求/响应体、透传链路并上报一条流量记录。
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {

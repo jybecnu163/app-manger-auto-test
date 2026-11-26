@@ -12,12 +12,18 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 出站 HTTP 调用记录的持久化与查询服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class ExternalCallRecordService {
 
     private final ExternalCallRecordMapper externalCallRecordMapper;
 
+    /**
+     * 按方法、URL、请求指纹和时间去重后批量保存外部调用。
+     */
     public void saveBatch(String appId, List<ExternalCallRecordDTO> records) {
         if (records == null || records.isEmpty()) {
             return;
@@ -39,6 +45,9 @@ public class ExternalCallRecordService {
         }
     }
 
+    /**
+     * 查询应用最近出站调用记录，供 Mock 生成使用。
+     */
     public List<ExternalCallRecord> listByApp(String appId) {
         return externalCallRecordMapper.selectList(new LambdaQueryWrapper<ExternalCallRecord>()
                 .eq(ExternalCallRecord::getAppId, appId)

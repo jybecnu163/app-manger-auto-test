@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * 扫描 Spring MVC 路由并推导请求/响应 Schema，供管理端自动生成测试表单。
+ */
 public class InterfaceScanner {
 
     private final ObjectProvider<RequestMappingHandlerMapping> mappingProvider;
@@ -52,6 +55,9 @@ public class InterfaceScanner {
         this.properties = properties;
     }
 
+    /**
+     * 扫描 RequestMappingHandlerMapping 并返回去重后的接口元数据。
+     */
     public List<InterfaceMetaDTO> scan() {
         RequestMappingHandlerMapping mapping = mappingProvider.getIfAvailable();
         if (mapping == null) {

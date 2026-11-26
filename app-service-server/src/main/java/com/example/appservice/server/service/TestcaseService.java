@@ -23,6 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 测试用例管理服务，并负责根据接口 Schema 自动生成预设用例。
+ */
 @Service
 public class TestcaseService {
 
@@ -37,6 +40,9 @@ public class TestcaseService {
         this.interfaceMapper = interfaceMapper;
     }
 
+    /**
+     * 按接口查询测试用例。
+     */
     public List<TestCaseVO> list(Long interfaceId) {
         List<TestCaseVO> result = new ArrayList<>();
         List<ApiTestCase> cases = testCaseMapper.selectList(new LambdaQueryWrapper<ApiTestCase>()
@@ -49,6 +55,9 @@ public class TestcaseService {
         return result;
     }
 
+    /**
+     * 查询应用下全部测试用例。
+     */
     public List<TestCaseVO> listByApp(String appId) {
         Map<Long, ApiInterface> interfaces = new HashMap<>();
         for (ApiInterface api : interfaceMapper.selectList(new LambdaQueryWrapper<ApiInterface>()
@@ -67,6 +76,9 @@ public class TestcaseService {
         return result;
     }
 
+    /**
+     * 保存用户自定义用例并按内容指纹去重。
+     */
     public TestCaseVO save(String appId, Long interfaceId, TestCaseSaveRequest request, String source) {
         String name = StringUtils.hasText(request.getName())
                 ? request.getName()
@@ -75,6 +87,9 @@ public class TestcaseService {
                 request.getHeaders(), request.getBody(), source);
     }
 
+    /**
+     * 删除指定测试用例。
+     */
     public void delete(Long interfaceId, Long caseId) {
         testCaseMapper.delete(new LambdaQueryWrapper<ApiTestCase>()
                 .eq(ApiTestCase::getInterfaceId, interfaceId)
@@ -85,6 +100,9 @@ public class TestcaseService {
         testCaseMapper.delete(new LambdaQueryWrapper<ApiTestCase>().eq(ApiTestCase::getAppId, appId));
     }
 
+    /**
+     * 按接口 Schema 生成默认值、空值和备选值三类自动用例。
+     */
     public void generateAutoCases(String appId, ApiInterface api) {
         JsonNode schema;
         try {

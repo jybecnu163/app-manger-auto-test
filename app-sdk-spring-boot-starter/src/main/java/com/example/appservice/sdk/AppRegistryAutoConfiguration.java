@@ -10,6 +10,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+/**
+ * SDK 自动装配总入口，按配置条件注册注册、录制、回放和 Mock 相关 Bean。
+ */
 @AutoConfiguration
 @EnableScheduling
 @ConditionalOnWebApplication
@@ -45,6 +48,9 @@ public class AppRegistryAutoConfiguration {
         return new InterfaceScanner(mappingProvider, properties);
     }
 
+    /**
+     * 创建初始录制开关，真实状态后续由管理端或心跳响应同步。
+     */
     @Bean
     public TrafficRecordSwitch trafficRecordSwitch(AppRegistryProperties properties) {
         return new TrafficRecordSwitch(properties.getTrafficRecord().isEnabled(), null);
@@ -98,6 +104,9 @@ public class AppRegistryAutoConfiguration {
         return new OutboundHttpRecordingInterceptor(properties, buffer, identity);
     }
 
+    /**
+     * 为普通 RestTemplate 添加出站调用录制拦截器。
+     */
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.external-call-record", name = "enabled", havingValue = "true")
     @org.springframework.core.annotation.Order(org.springframework.core.Ordered.LOWEST_PRECEDENCE)
@@ -135,6 +144,9 @@ public class AppRegistryAutoConfiguration {
         return new ReplayRestTemplateInterceptor(properties, store, identity);
     }
 
+    /**
+     * 为回放 RestTemplate 添加 Mock 拦截，优先级高于录制拦截器。
+     */
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
     @org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
@@ -164,6 +176,9 @@ public class AppRegistryAutoConfiguration {
         return new ReplayTaskDecorator();
     }
 
+    /**
+     * 为线程池设置回放上下文传播装饰器。
+     */
     @Bean
     @ConditionalOnProperty(prefix = "app.registry.replay", name = "enabled", havingValue = "true")
     public static org.springframework.beans.factory.config.BeanPostProcessor replayTaskDecoratorPostProcessor(

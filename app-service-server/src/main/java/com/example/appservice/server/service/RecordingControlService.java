@@ -24,6 +24,9 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 流量录制开关服务，负责持久化状态并向在线 SDK 实例下发控制指令。
+ */
 @Service
 @RequiredArgsConstructor
 public class RecordingControlService {
@@ -34,6 +37,9 @@ public class RecordingControlService {
     private final AppInstanceMapper instanceMapper;
     private final RestTemplate restTemplate = createRestTemplate();
 
+    /**
+     * 更新录制开关与生效时间，并通知所有在线实例；单实例失败只记录日志。
+     */
     public void setEnabled(String appId, boolean enabled, LocalDateTime startAt) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
                 .eq(App::getAppId, appId)

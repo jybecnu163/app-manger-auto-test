@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
+/**
+ * RestTemplate 出站调用录制拦截器，只在非回放态采集外部 HTTP 调用。
+ */
 public class OutboundHttpRecordingInterceptor implements ClientHttpRequestInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(OutboundHttpRecordingInterceptor.class);
@@ -29,6 +32,9 @@ public class OutboundHttpRecordingInterceptor implements ClientHttpRequestInterc
         this.identity = identity;
     }
 
+    /**
+     * 执行原始请求并缓存请求/响应快照后入队上报。
+     */
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body,
                                         ClientHttpRequestExecution execution) throws IOException {

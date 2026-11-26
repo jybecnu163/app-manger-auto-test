@@ -13,6 +13,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 回放态 RestTemplate 拦截器，按请求指纹返回 Mock 响应，未命中时阻止真实外部调用。
+ */
 public class ReplayRestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(ReplayRestTemplateInterceptor.class);
@@ -29,6 +32,9 @@ public class ReplayRestTemplateInterceptor implements ClientHttpRequestIntercept
         this.identity = identity;
     }
 
+    /**
+     * 命中 Mock 则返回模拟响应；未命中则抛出 ReplayMockMissingException。
+     */
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body,
                                         ClientHttpRequestExecution execution) throws IOException {

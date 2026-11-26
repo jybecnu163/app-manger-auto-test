@@ -1,5 +1,8 @@
 package com.example.appservice.sdk;
 
+/**
+ * 回放上下文 ThreadLocal 工具，保存回放信息并供过滤器、拦截器和任务装饰器共享。
+ */
 public final class ReplayContext {
 
     private static final ThreadLocal<ReplayInfo> INFO = new ThreadLocal<>();
@@ -8,19 +11,31 @@ public final class ReplayContext {
     private ReplayContext() {
     }
 
+    /**
+     * 判断当前线程是否处于回放态。
+     */
     public static boolean isReplay() {
         return INFO.get() != null || Boolean.TRUE.equals(REPLAY.get());
     }
 
+    /**
+     * 获取当前线程的回放信息。
+     */
     public static ReplayInfo get() {
         return INFO.get();
     }
 
+    /**
+     * 设置当前线程回放信息。
+     */
     public static void set(ReplayInfo info) {
         INFO.set(info);
         REPLAY.set(info != null);
     }
 
+    /**
+     * 仅设置回放标志，用于无法携带完整回放头的场景。
+     */
     public static void setReplay(boolean replay) {
         if (replay) {
             REPLAY.set(true);
@@ -29,11 +44,17 @@ public final class ReplayContext {
         }
     }
 
+    /**
+     * 返回当前回放 ID。
+     */
     public static String replayId() {
         ReplayInfo info = INFO.get();
         return info == null ? null : info.getReplayId();
     }
 
+    /**
+     * 清理当前线程回放上下文。
+     */
     public static void clear() {
         INFO.remove();
         REPLAY.remove();

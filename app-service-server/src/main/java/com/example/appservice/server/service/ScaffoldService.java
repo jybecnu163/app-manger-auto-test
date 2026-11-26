@@ -13,9 +13,15 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * 空壳业务系统工程生成服务，负责校验参数、生成凭据并在内存中打包 ZIP。
+ */
 @Service
 public class ScaffoldService {
 
+    /**
+     * 生成包含 pom、README、启动类、健康检查接口和配置的 ZIP。
+     */
     public ScaffoldResult generate(ScaffoldRequest request) {
         String systemName = safeName(request.getSystemName());
         int port = request.getPort();
@@ -192,6 +198,9 @@ public class ScaffoldService {
         return name.isEmpty() ? "generated-app" : name;
     }
 
+    /**
+     * 将系统名转换为合法 Java 启动类名。
+     */
     private String applicationClassName(String systemName) {
         StringBuilder builder = new StringBuilder();
         for (String part : safeName(systemName).split("[-_]+")) {

@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 
+/**
+ * 回放签名工具，使用 HMAC-SHA256 对回放身份要素签名，防止伪造回放请求。
+ */
 public final class ReplaySignatureCalculator {
 
     private static final String ALGORITHM = "HmacSHA256";
@@ -13,6 +16,9 @@ public final class ReplaySignatureCalculator {
     private ReplaySignatureCalculator() {
     }
 
+    /**
+     * 按 replayId|mode|timestamp|nonce 顺序拼接并生成小写十六进制签名。
+     */
     public static String sign(String secret, String replayId, String mode,
                               String timestamp, String nonce) {
         String content = nullToEmpty(replayId) + "|" + nullToEmpty(mode) + "|"
@@ -26,6 +32,9 @@ public final class ReplaySignatureCalculator {
         }
     }
 
+    /**
+     * 使用常量时间比较校验回放签名是否有效。
+     */
     public static boolean verify(String secret, String replayId, String mode,
                                  String timestamp, String nonce, String signature) {
         if (signature == null) {

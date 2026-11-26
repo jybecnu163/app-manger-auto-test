@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+/**
+ * 录制数据脱敏工具，提供 Header、查询参数和 JSON Body 的截断与掩码处理。
+ */
 public final class MaskUtils {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -20,6 +23,9 @@ public final class MaskUtils {
     private MaskUtils() {
     }
 
+    /**
+     * 对敏感 Header 进行掩码。
+     */
     public static String maskHeaders(Map<String, String> headers, List<String> maskNames) {
         if (headers == null) {
             return null;
@@ -31,6 +37,9 @@ public final class MaskUtils {
         return toJson(masked);
     }
 
+    /**
+     * 将 Map 序列化为 JSON 字符串。
+     */
     public static String toJson(Map<String, ?> values) {
         try {
             return MAPPER.writeValueAsString(values);
@@ -39,6 +48,9 @@ public final class MaskUtils {
         }
     }
 
+    /**
+     * 将查询参数 Map 序列化为 JSON 字符串。
+     */
     public static String queryParamsJson(Map<String, String[]> params) {
         Map<String, String> flat = new LinkedHashMap<>();
         if (params != null) {
@@ -50,6 +62,9 @@ public final class MaskUtils {
         return toJson(new TreeMap<>(flat));
     }
 
+    /**
+     * 对 Body 中敏感字段进行掩码。
+     */
     public static String maskBody(String body, List<String> maskFields) {
         if (body == null || body.isEmpty()) {
             return body;
@@ -70,6 +85,9 @@ public final class MaskUtils {
         }
     }
 
+    /**
+     * 按配置长度截断字符串。
+     */
     public static String truncate(String value, int maxBytes) {
         if (value == null) {
             return null;

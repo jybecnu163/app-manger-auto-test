@@ -19,6 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Dry-Run 回放入口过滤器，校验回放头、时间窗、签名和 nonce，并在强制回滚事务中执行请求。
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class ReplayFilter extends OncePerRequestFilter {
 
@@ -45,6 +48,9 @@ public class ReplayFilter extends OncePerRequestFilter {
         this.mockStore = mockStore;
     }
 
+    /**
+     * 校验回放请求、设置回放上下文、执行并回滚事务、输出 Mock 统计头。
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {

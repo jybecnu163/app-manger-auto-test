@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
+/**
+ * 接收管理端下发的录制开关指令，并校验 appId/token 与本地身份一致。
+ */
 @RestController
 public class TrafficRecordSwitchController {
 
@@ -20,6 +23,9 @@ public class TrafficRecordSwitchController {
         this.recorderSwitch = recorderSwitch;
     }
 
+    /**
+     * 更新本地录制开关状态。
+     */
     @PostMapping("/api/agent/traffic-record/enabled")
     public Result<Void> set(@RequestBody TrafficRecordSwitchRequest request) {
         if (request == null || !StringUtils.hasText(request.getAppId())

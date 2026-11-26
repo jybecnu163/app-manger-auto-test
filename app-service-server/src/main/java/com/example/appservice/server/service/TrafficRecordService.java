@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 入站流量记录的持久化、查询与接口归属关联服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class TrafficRecordService {
@@ -23,6 +26,9 @@ public class TrafficRecordService {
     private final TrafficRecordMapper trafficRecordMapper;
     private final ApiInterfaceMapper interfaceMapper;
 
+    /**
+     * 按请求指纹去重后批量保存流量，并补全关联接口 ID。
+     */
     public void saveBatch(String appId, List<TrafficRecordDTO> records) {
         if (records == null || records.isEmpty()) {
             return;
@@ -48,6 +54,9 @@ public class TrafficRecordService {
         }
     }
 
+    /**
+     * 按接口、方法、状态、时间范围、traceId 等条件查询流量。
+     */
     public List<TrafficRecord> list(String appId, Long interfaceId, String method, Integer status,
                                     boolean onlyFailures, LocalDateTime start, LocalDateTime end,
                                     String traceId) {
@@ -65,6 +74,9 @@ public class TrafficRecordService {
         return trafficRecordMapper.selectList(query);
     }
 
+    /**
+     * 使用 AntPathMatcher 按最长路径模板匹配接口 ID。
+     */
     public Long findInterfaceId(String appId, String method, String path) {
         List<ApiInterface> candidates = interfaceMapper.selectList(new LambdaQueryWrapper<ApiInterface>()
                 .eq(ApiInterface::getAppId, appId)

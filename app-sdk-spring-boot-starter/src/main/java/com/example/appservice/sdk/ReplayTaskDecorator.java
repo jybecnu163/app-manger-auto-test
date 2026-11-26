@@ -2,8 +2,14 @@ package com.example.appservice.sdk;
 
 import org.springframework.core.task.TaskDecorator;
 
+/**
+ * 线程池任务装饰器，将回放上下文传播到异步任务并在结束后清理。
+ */
 public class ReplayTaskDecorator implements TaskDecorator {
 
+    /**
+     * 包装 Runnable，复制回放上下文并在任务完成后清理。
+     */
     @Override
     public Runnable decorate(Runnable runnable) {
         ReplayInfo info = ReplayContext.get();

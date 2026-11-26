@@ -2,6 +2,9 @@ package com.example.appservice.common.dto;
 
 import lombok.Data;
 
+/**
+ * 外部调用 Mock 规则定义，urlPattern 与 requestHash 共同决定回放时是否命中。
+ */
 @Data
 public class MockResponseDTO {
 

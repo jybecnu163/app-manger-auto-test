@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 流量录制开关控制请求：enabled 表示目标状态，startAt 表示录制生效时间点。
+ */
 @Data
 public class TrafficRecordSwitchRequest {
 

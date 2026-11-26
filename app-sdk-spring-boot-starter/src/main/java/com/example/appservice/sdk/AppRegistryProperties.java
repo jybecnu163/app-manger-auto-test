@@ -6,6 +6,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * app.registry.* 配置载体，包含注册、流量录制、外部调用录制和回放参数。
+ */
 @Data
 public class AppRegistryProperties {
 

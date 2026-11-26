@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 单条入站流量录制记录，包含请求快照、响应快照、链路标识和请求指纹。
+ */
 @Data
 public class TrafficRecordDTO {
 

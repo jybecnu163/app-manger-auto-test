@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.appservice.server.entity.AppInstance;
 import org.apache.ibatis.annotations.Update;
 
+/**
+ * 应用实例 Mapper，提供心跳场景下的实例 UPSERT 操作。
+ */
 public interface AppInstanceMapper extends BaseMapper<AppInstance> {
 
     @Update("INSERT INTO app_instance (app_id, instance_key, ip, port, hostname, status, last_heartbeat_at, start_time) "

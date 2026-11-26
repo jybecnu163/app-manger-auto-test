@@ -14,6 +14,9 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 启动后扫描 REQUIRES_NEW 事务方法并告警，提示 Dry-Run 可能无法回滚。
+ */
 public class RequiresNewDetector {
 
     private static final Logger log = LoggerFactory.getLogger(RequiresNewDetector.class);
@@ -24,6 +27,9 @@ public class RequiresNewDetector {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * 扫描 Spring Bean 方法并输出风险告警。
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void detect() {
         Set<String> reported = new HashSet<>();

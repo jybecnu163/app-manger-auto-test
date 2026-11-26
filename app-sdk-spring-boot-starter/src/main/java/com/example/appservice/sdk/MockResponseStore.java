@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 按 replayId 缓存 Mock 规则，并提供匹配与命中统计。
+ */
 public class MockResponseStore {
 
     private static final Logger log = LoggerFactory.getLogger(MockResponseStore.class);
@@ -42,6 +45,9 @@ public class MockResponseStore {
         this.restTemplate = new RestTemplate(factory);
     }
 
+    /**
+     * 按 replayId 从管理端加载 Mock 规则。
+     */
     public synchronized void load(String replayId) {
         String appId = identity.appId();
         if (!StringUtils.hasText(appId)) {
@@ -76,6 +82,9 @@ public class MockResponseStore {
         }
     }
 
+    /**
+     * 按 requestHash 查找启用的 Mock 规则。
+     */
     public MockResponseDTO find(String requestHash) {
         MockResponseDTO rule = requestHash == null ? null : rules.get(requestHash);
         if (rule == null) {
@@ -86,14 +95,23 @@ public class MockResponseStore {
         return rule;
     }
 
+    /**
+     * 返回 Mock 命中次数。
+     */
     public int hits() {
         return hits.get();
     }
 
+    /**
+     * 返回 Mock 未命中次数。
+     */
     public int misses() {
         return misses.get();
     }
 
+    /**
+     * 重置命中与未命中计数。
+     */
     public void reset() {
         rules.clear();
         hits.set(0);
