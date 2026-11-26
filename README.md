@@ -49,6 +49,7 @@ java -jar app-service-server/target/app-service-server-1.0.0.jar
 - `GET /api/health` 健康检查接口
 - 已配置好的 SDK 依赖与 `app.registry.*` 配置
 - 自动生成的 appId 与 token
+- 按系统名命名的 Spring Boot 启动类，例如 `demo-app` 对应 `DemoAppApplication`
 - `README.md` 启动说明
 
 启动前先在项目根目录执行 `mvn install`，确保 SDK 依赖已安装到本地仓库。解压生成包后执行：

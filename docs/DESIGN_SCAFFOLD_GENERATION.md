@@ -61,7 +61,7 @@ scaffold-{artifactId}-{port}.zip
 ├── README.md
 └── src/main/
     ├── java/com/example/generated/app/
-    │   ├── GeneratedApplication.java
+    │   ├── {ApplicationClass}.java
     │   └── HealthController.java
     └── resources/application.yml
 ```
@@ -166,9 +166,10 @@ POST /api/admin/scaffolds
 
 1. `systemName` 只允许字母、数字、`_`、`-`，其他字符替换为 `-`。
 2. `artifactId` = 小写 `systemName`，`_` 转为 `-`。
-3. `appId` = `APP-` + 大写无横线系统名 + `-` + 6 位随机十六进制后缀。
-4. `token` = UUID。
-5. ZIP 文件名 = `scaffold-{artifactId}-{port}.zip`。
+3. `ApplicationClass` = `systemName` 按 `-` / `_` 分段转 PascalCase 后追加 `Application`，例如 `demo-app` 生成 `DemoAppApplication`；数字开头时追加 `App` 前缀。
+4. `appId` = `APP-` + 大写无横线系统名 + `-` + 6 位随机十六进制后缀。
+5. `token` = UUID。
+6. ZIP 文件名 = `scaffold-{artifactId}-{port}.zip`。
 
 ### 6.3 管理端地址推导
 

@@ -1,0 +1,13 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: user-service
+app:
+  registry:
+    server-url: http://localhost:8080
+    system-name: user-service
+    env: dev
+    advertise-ip: 127.0.0.1
+    appid: APP0003
+    token: 332d8bd7-c424-47b3-86c1-7423e5ca4f04

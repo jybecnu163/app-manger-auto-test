@@ -29,6 +29,7 @@ public class ScaffoldService {
         }
 
         String artifactId = systemName.toLowerCase(Locale.ROOT).replace('_', '-');
+        String applicationClass = applicationClassName(systemName);
         String appId = "APP-" + systemName.toUpperCase(Locale.ROOT).replace("-", "")
                 + "-" + randomSuffix();
         String token = UUID.randomUUID().toString();
@@ -40,8 +41,8 @@ public class ScaffoldService {
             write(zip, prefix + "pom.xml", pom(artifactId));
             write(zip, prefix + "README.md",
                     readme(systemName, artifactId, appId, token, port, serverUrl));
-            write(zip, prefix + "src/main/java/com/example/generated/app/GeneratedApplication.java",
-                    applicationClass());
+            write(zip, prefix + "src/main/java/com/example/generated/app/" + applicationClass + ".java",
+                    applicationClass(applicationClass));
             write(zip, prefix + "src/main/java/com/example/generated/app/HealthController.java",
                     healthController(systemName));
             write(zip, prefix + "src/main/resources/application.yml",
@@ -113,7 +114,7 @@ public class ScaffoldService {
                 """.formatted(port, systemName, serverUrl, systemName, env, appId, token);
     }
 
-    private String applicationClass() {
+    private String applicationClass(String className) {
         return """
                 package com.example.generated.app;
 
@@ -121,12 +122,12 @@ public class ScaffoldService {
                 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
                 @SpringBootApplication
-                public class GeneratedApplication {
+                public class %s {
                     public static void main(String[] args) {
-                        SpringApplication.run(GeneratedApplication.class, args);
+                        SpringApplication.run(%s.class, args);
                     }
                 }
-                """;
+                """.formatted(className, className);
     }
 
     private String healthController(String systemName) {
@@ -189,6 +190,22 @@ public class ScaffoldService {
     private String safeName(String raw) {
         String name = raw == null ? "" : raw.trim().replaceAll("[^A-Za-z0-9_-]", "-");
         return name.isEmpty() ? "generated-app" : name;
+    }
+
+    private String applicationClassName(String systemName) {
+        StringBuilder builder = new StringBuilder();
+        for (String part : safeName(systemName).split("[-_]+")) {
+            if (part.isEmpty()) continue;
+            String normalized = part.equals(part.toUpperCase(Locale.ROOT))
+                    ? part.toLowerCase(Locale.ROOT) : part;
+            builder.append(Character.toUpperCase(normalized.charAt(0)))
+                    .append(normalized.substring(1));
+        }
+        String prefix = builder.length() == 0 ? "Generated" : builder.toString();
+        if (Character.isDigit(prefix.charAt(0))) {
+            prefix = "App" + prefix;
+        }
+        return prefix + "Application";
     }
 
     private String trimSlash(String url) {
