@@ -1,24 +1,9 @@
 package com.example.appservice.sdk.config;
-import com.example.appservice.sdk.logging.ControllerLogAspect;
-import com.example.appservice.sdk.record.ExternalCallRecordBuffer;
-import com.example.appservice.sdk.record.OutboundHttpRecordingInterceptor;
-import com.example.appservice.sdk.record.TrafficCaptureFilter;
-import com.example.appservice.sdk.record.TrafficRecordBuffer;
-import com.example.appservice.sdk.record.TrafficRecordSwitch;
-import com.example.appservice.sdk.record.TrafficRecordSwitchController;
-import com.example.appservice.sdk.record.TrafficReporter;
-import com.example.appservice.sdk.registry.AppIdFileStore;
-import com.example.appservice.sdk.registry.AppIdentityResolver;
-import com.example.appservice.sdk.registry.AppRegistryClient;
-import com.example.appservice.sdk.registry.HeartbeatScheduler;
-import com.example.appservice.sdk.registry.InterfaceScanner;
-import com.example.appservice.sdk.replay.MockResponseStore;
-import com.example.appservice.sdk.replay.NonceCache;
-import com.example.appservice.sdk.replay.ReplayFilter;
-import com.example.appservice.sdk.replay.ReplayRestTemplateInterceptor;
-import com.example.appservice.sdk.replay.ReplayTaskDecorator;
-import com.example.appservice.sdk.replay.RequiresNewDetector;
 
+import com.example.appservice.sdk.logging.ControllerLogAspect;
+import com.example.appservice.sdk.record.*;
+import com.example.appservice.sdk.registry.*;
+import com.example.appservice.sdk.replay.*;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -78,7 +63,7 @@ public class AppRegistryAutoConfiguration {
      */
     @Bean
     public InterfaceScanner interfaceScanner(ObjectProvider<RequestMappingHandlerMapping> mappingProvider,
-                                              AppRegistryProperties properties) {
+                                             AppRegistryProperties properties) {
         return new InterfaceScanner(mappingProvider, properties);
     }
 

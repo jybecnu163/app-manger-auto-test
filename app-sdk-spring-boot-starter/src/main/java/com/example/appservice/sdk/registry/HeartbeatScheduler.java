@@ -1,8 +1,8 @@
 package com.example.appservice.sdk.registry;
-import com.example.appservice.sdk.config.AppRegistryProperties;
-import com.example.appservice.sdk.record.TrafficRecordSwitch;
 
 import com.example.appservice.common.dto.*;
+import com.example.appservice.sdk.config.AppRegistryProperties;
+import com.example.appservice.sdk.record.TrafficRecordSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

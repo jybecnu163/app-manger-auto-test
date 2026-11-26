@@ -26,6 +26,7 @@ SDK 的注册流程分成两条线：
 自动装配条件是 Web 应用且配置了 `app.registry.server-url`：
 
 ```java
+
 @AutoConfiguration
 @EnableScheduling
 @ConditionalOnWebApplication
@@ -34,7 +35,8 @@ public class AppRegistryAutoConfiguration {
 }
 ```
 
-对应源码：`app-sdk-spring-boot-starter/src/main/java/com/example/appservice/sdk/config/AppRegistryAutoConfiguration.java:32-39`。
+对应源码：
+`app-sdk-spring-boot-starter/src/main/java/com/example/appservice/sdk/config/AppRegistryAutoConfiguration.java:32-39`。
 
 最小配置示例：
 
@@ -91,16 +93,16 @@ sequenceDiagram
 
 ## 4. 关键类与职责
 
-| 类 | 位置 | 职责 |
-|---|---|---|
-| `AppRegistryAutoConfiguration` | `sdk.config` | 自动装配注册、心跳、接口扫描等 Bean |
-| `HeartbeatScheduler` | `sdk.registry` | 启动注册、定时心跳、接口 hash 计算、录制状态同步 |
-| `AppRegistryClient` | `sdk.registry` | 调用管理端 `/api/agent/register` 和 `/api/agent/heartbeat` |
-| `InterfaceScanner` | `sdk.registry` | 扫描 Spring MVC 路由并生成接口元数据与 Schema |
-| `AppIdentityResolver` | `sdk.registry` | 解析 `appId/token`，配置优先、本地文件兜底 |
-| `AppIdFileStore` | `sdk.registry` | 本地凭据文件读写，原子写入和权限收敛 |
-| `AgentController` | `app-service-server/controller` | 接收注册和心跳请求 |
-| `AppService` | `app-service-server/service` | 应用幂等注册、鉴权、实例 upsert、接口重建 |
+| 类                              | 位置                              | 职责                                                   |
+|--------------------------------|---------------------------------|------------------------------------------------------|
+| `AppRegistryAutoConfiguration` | `sdk.config`                    | 自动装配注册、心跳、接口扫描等 Bean                                 |
+| `HeartbeatScheduler`           | `sdk.registry`                  | 启动注册、定时心跳、接口 hash 计算、录制状态同步                          |
+| `AppRegistryClient`            | `sdk.registry`                  | 调用管理端 `/api/agent/register` 和 `/api/agent/heartbeat` |
+| `InterfaceScanner`             | `sdk.registry`                  | 扫描 Spring MVC 路由并生成接口元数据与 Schema                     |
+| `AppIdentityResolver`          | `sdk.registry`                  | 解析 `appId/token`，配置优先、本地文件兜底                         |
+| `AppIdFileStore`               | `sdk.registry`                  | 本地凭据文件读写，原子写入和权限收敛                                   |
+| `AgentController`              | `app-service-server/controller` | 接收注册和心跳请求                                            |
+| `AppService`                   | `app-service-server/service`    | 应用幂等注册、鉴权、实例 upsert、接口重建                             |
 
 ## 5. 新业务系统注册
 
@@ -119,11 +121,11 @@ sequenceDiagram
 
 `ensureInitialized()` 按以下顺序获取身份：
 
-| 优先级 | 条件 | 行为 |
-|---|---|---|
-| 1 | YAML 已配置 `app.registry.appid` 和 `token` | 调用注册接口，管理端按 `appId` 幂等识别 |
-| 2 | 本地 appid 文件存在且有效 | 直接读取本地 `appId/token`，不重复注册，只发送心跳 |
-| 3 | 两者都没有 | 调用注册接口，管理端签发新凭据，SDK 写入本地文件 |
+| 优先级 | 条件                                      | 行为                               |
+|-----|-----------------------------------------|----------------------------------|
+| 1   | YAML 已配置 `app.registry.appid` 和 `token` | 调用注册接口，管理端按 `appId` 幂等识别         |
+| 2   | 本地 appid 文件存在且有效                        | 直接读取本地 `appId/token`，不重复注册，只发送心跳 |
+| 3   | 两者都没有                                   | 调用注册接口，管理端签发新凭据，SDK 写入本地文件       |
 
 如果 `systemName` 为空，SDK 会回落到 `spring.application.name`，再回落为 `unknown-system`。
 
@@ -229,15 +231,15 @@ POST {server-url}/api/agent/register
 
 每个接口生成以下信息：
 
-| 字段 | 来源 |
-|---|---|
-| `method` | `@RequestMapping` / `@GetMapping` 等 |
-| `path` | 路由路径模板 |
-| `controller` | Controller 类简名 |
-| `operation` | Java 方法名 |
-| `requestSchema` | 方法参数推导出的 JSON Schema |
-| `responseSchema` | 方法返回值推导出的 JSON Schema |
-| `schemaHash` | `method + path + requestSchema + responseSchema` 的 MD5 |
+| 字段               | 来源                                                     |
+|------------------|--------------------------------------------------------|
+| `method`         | `@RequestMapping` / `@GetMapping` 等                    |
+| `path`           | 路由路径模板                                                 |
+| `controller`     | Controller 类简名                                         |
+| `operation`      | Java 方法名                                               |
+| `requestSchema`  | 方法参数推导出的 JSON Schema                                   |
+| `responseSchema` | 方法返回值推导出的 JSON Schema                                  |
+| `schemaHash`     | `method + path + requestSchema + responseSchema` 的 MD5 |
 
 请求 Schema 会分析：
 
@@ -294,11 +296,11 @@ app:
 3. 将实例信息 `upsert` 到 `app_instance`；
 4. 比较请求中的 `interfacesHash` 与数据库中的 `app.interfaces_hash`；
 5. 若 hash 不同：
-   - 删除该 appId 下的旧接口；
-   - 删除该 appId 下的旧自动用例；
-   - 逐条插入心跳上报的接口；
-   - 为每个接口生成自动用例；
-   - 更新应用上的 `interfacesHash`；
+    - 删除该 appId 下的旧接口；
+    - 删除该 appId 下的旧自动用例；
+    - 逐条插入心跳上报的接口；
+    - 为每个接口生成自动用例；
+    - 更新应用上的 `interfacesHash`；
 6. 返回 `HeartbeatResponse`，包含录制开关和起始时间。
 
 对应源码：`AppService.java:116-169`。
@@ -328,7 +330,8 @@ catch Exception
 
 ## 9. 身份解析器的作用
 
-`AppRegistryClient` 上报流量、外部调用、Mock 拉取时都需要身份，这些场景不经过 `HeartbeatScheduler` 的本地字段，而是通过 `AppIdentityResolver` 统一解析：
+`AppRegistryClient` 上报流量、外部调用、Mock 拉取时都需要身份，这些场景不经过 `HeartbeatScheduler` 的本地字段，而是通过
+`AppIdentityResolver` 统一解析：
 
 1. 优先读 YAML 配置；
 2. 没有配置则读取本地 appid 文件。
@@ -339,12 +342,12 @@ catch Exception
 
 注册与心跳成功后，管理端主要写入三类数据：
 
-| 表 | 写入时机 | 内容 |
-|---|---|---|
-| `app` | 首次注册、appId/token 变更、接口 hash 变更 | 应用身份、环境、token、接口 hash、录制状态 |
-| `app_instance` | 每次心跳 | 实例地址、状态、最后心跳时间、启动时间 |
-| `api_interface` | interfacesHash 变化时 | 接口方法、路径、Controller、操作名、Schema、schemaHash |
-| `api_test_case` | interfacesHash 变化时 | 根据接口 Schema 生成的自动用例 |
+| 表               | 写入时机                           | 内容                                       |
+|-----------------|--------------------------------|------------------------------------------|
+| `app`           | 首次注册、appId/token 变更、接口 hash 变更 | 应用身份、环境、token、接口 hash、录制状态               |
+| `app_instance`  | 每次心跳                           | 实例地址、状态、最后心跳时间、启动时间                      |
+| `api_interface` | interfacesHash 变化时             | 接口方法、路径、Controller、操作名、Schema、schemaHash |
+| `api_test_case` | interfacesHash 变化时             | 根据接口 Schema 生成的自动用例                      |
 
 ## 11. 风险与边界
 
@@ -357,20 +360,20 @@ catch Exception
 
 ## 12. 源码索引
 
-| 主题 | 文件 | 关键行 |
-|---|---|---|
-| 自动装配条件 | `AppRegistryAutoConfiguration.java` | 32-39 |
-| 启动注册与心跳入口 | `HeartbeatScheduler.java` | 62-91 |
-| 身份初始化 | `HeartbeatScheduler.java` | 117-149 |
-| 注册请求构造 | `HeartbeatScheduler.java` | 154-166 |
-| 心跳上报 | `HeartbeatScheduler.java` | 171-184 |
-| 接口汇总 hash | `HeartbeatScheduler.java` | 215-249 |
-| 注册/心跳客户端 | `AppRegistryClient.java` | 39-54 |
-| 统一响应解包 | `AppRegistryClient.java` | 59-79 |
-| 接口扫描 | `InterfaceScanner.java` | 65-85、90-167 |
-| 凭据文件读写 | `AppIdFileStore.java` | 28-36、73-99 |
-| 身份解析 | `AppIdentityResolver.java` | 25-52 |
-| 配置属性 | `AppRegistryProperties.java` | 15-23 |
-| Agent 接口 | `AgentController.java` | 43-54 |
-| 管理端注册 | `AppService.java` | 47-94 |
-| 管理端心跳 | `AppService.java` | 116-169 |
+| 主题        | 文件                                  | 关键行          |
+|-----------|-------------------------------------|--------------|
+| 自动装配条件    | `AppRegistryAutoConfiguration.java` | 32-39        |
+| 启动注册与心跳入口 | `HeartbeatScheduler.java`           | 62-91        |
+| 身份初始化     | `HeartbeatScheduler.java`           | 117-149      |
+| 注册请求构造    | `HeartbeatScheduler.java`           | 154-166      |
+| 心跳上报      | `HeartbeatScheduler.java`           | 171-184      |
+| 接口汇总 hash | `HeartbeatScheduler.java`           | 215-249      |
+| 注册/心跳客户端  | `AppRegistryClient.java`            | 39-54        |
+| 统一响应解包    | `AppRegistryClient.java`            | 59-79        |
+| 接口扫描      | `InterfaceScanner.java`             | 65-85、90-167 |
+| 凭据文件读写    | `AppIdFileStore.java`               | 28-36、73-99  |
+| 身份解析      | `AppIdentityResolver.java`          | 25-52        |
+| 配置属性      | `AppRegistryProperties.java`        | 15-23        |
+| Agent 接口  | `AgentController.java`              | 43-54        |
+| 管理端注册     | `AppService.java`                   | 47-94        |
+| 管理端心跳     | `AppService.java`                   | 116-169      |
