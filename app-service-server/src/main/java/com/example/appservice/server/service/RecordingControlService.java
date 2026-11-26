@@ -1,6 +1,7 @@
 package com.example.appservice.server.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.example.appservice.common.dto.Result;
 import com.example.appservice.common.dto.TrafficRecordSwitchRequest;
 import com.example.appservice.server.entity.App;
@@ -40,10 +41,11 @@ public class RecordingControlService {
         if (app == null) {
             throw new IllegalArgumentException("app not found: " + appId);
         }
-        app.setTrafficRecordEnabled(enabled);
-        app.setTrafficRecordStartAt(enabled ? startAt : null);
-        app.setUpdatedAt(LocalDateTime.now());
-        appMapper.updateById(app);
+        appMapper.update(null, new LambdaUpdateWrapper<App>()
+                .eq(App::getAppId, appId)
+                .set(App::getTrafficRecordEnabled, enabled)
+                .set(App::getTrafficRecordStartAt, enabled ? startAt : null)
+                .set(App::getUpdatedAt, LocalDateTime.now()));
 
         List<AppInstance> instances = instanceMapper.selectList(new LambdaQueryWrapper<AppInstance>()
                 .eq(AppInstance::getAppId, appId)
