@@ -159,6 +159,8 @@ public class AppService {
             item.setAppId(app.getAppId());
             item.setName(app.getName());
             item.setEnv(app.getEnv());
+            item.setTrafficRecordEnabled(app.isTrafficRecordEnabled());
+            item.setTrafficRecordStartAt(app.getTrafficRecordStartAt());
             item.setTotalInstances(instances.size());
             item.setOnlineInstances(instances.stream().filter(i -> "UP".equals(i.getStatus())).count());
             Long count = interfaceMapper.selectCount(new LambdaQueryWrapper<ApiInterface>()

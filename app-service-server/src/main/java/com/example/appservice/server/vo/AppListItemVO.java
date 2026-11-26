@@ -10,6 +10,8 @@ public class AppListItemVO {
     private String appId;
     private String name;
     private String env;
+    private boolean trafficRecordEnabled;
+    private LocalDateTime trafficRecordStartAt;
     private long onlineInstances;
     private long totalInstances;
     private long interfaceCount;

@@ -10,6 +10,16 @@ CREATE TABLE IF NOT EXISTS app (
     UNIQUE KEY uk_app_name_env (name, env)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+SET @sql = IF(EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'app' AND COLUMN_NAME = 'traffic_record_enabled'), 'SELECT 1', 'ALTER TABLE app ADD COLUMN traffic_record_enabled TINYINT NOT NULL DEFAULT 0');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'app' AND COLUMN_NAME = 'traffic_record_start_at'), 'SELECT 1', 'ALTER TABLE app ADD COLUMN traffic_record_start_at DATETIME');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 CREATE TABLE IF NOT EXISTS app_instance (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     app_id VARCHAR(64) NOT NULL,

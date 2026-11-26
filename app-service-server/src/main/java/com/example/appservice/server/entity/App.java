@@ -17,6 +17,8 @@ public class App {
     private String name;
     private String env;
     private String token;
+    private boolean trafficRecordEnabled;
+    private LocalDateTime trafficRecordStartAt;
     private String interfacesHash;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
