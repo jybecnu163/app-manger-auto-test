@@ -2,6 +2,7 @@ package com.example.appservice.server.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.appservice.common.dto.HeartbeatRequest;
+import com.example.appservice.common.dto.HeartbeatResponse;
 import com.example.appservice.common.dto.InstanceInfoDTO;
 import com.example.appservice.common.dto.InterfaceMetaDTO;
 import com.example.appservice.common.dto.RegisterRequest;
@@ -100,7 +101,7 @@ public class AppService {
     }
 
     @Transactional
-    public void heartbeat(HeartbeatRequest req) {
+    public HeartbeatResponse heartbeat(HeartbeatRequest req) {
         App app = appMapper.selectOne(new LambdaQueryWrapper<App>()
                 .eq(App::getAppId, req.getAppId())
                 .last("limit 1"));
@@ -149,6 +150,11 @@ public class AppService {
             app.setUpdatedAt(LocalDateTime.now());
             appMapper.updateById(app);
         }
+
+        HeartbeatResponse response = new HeartbeatResponse();
+        response.setTrafficRecordEnabled(app.isTrafficRecordEnabled());
+        response.setTrafficRecordStartAt(app.getTrafficRecordStartAt());
+        return response;
     }
 
     public List<AppListItemVO> listApps() {

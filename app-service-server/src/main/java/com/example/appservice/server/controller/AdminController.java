@@ -2,12 +2,14 @@ package com.example.appservice.server.controller;
 
 import com.example.appservice.common.dto.MockResponseDTO;
 import com.example.appservice.common.dto.Result;
+import com.example.appservice.common.dto.TrafficRecordSwitchRequest;
 import com.example.appservice.server.entity.ApiInterface;
 import com.example.appservice.server.entity.ExternalCallRecord;
 import com.example.appservice.server.entity.TrafficRecord;
 import com.example.appservice.server.service.AppService;
 import com.example.appservice.server.service.ExternalCallRecordService;
 import com.example.appservice.server.service.MockResponseService;
+import com.example.appservice.server.service.RecordingControlService;
 import com.example.appservice.server.service.TrafficRecordService;
 import com.example.appservice.server.service.TestProxyService;
 import com.example.appservice.server.service.TestcaseService;
@@ -45,6 +47,7 @@ public class AdminController {
     private final MockResponseService mockResponseService;
     private final TrafficRecordService trafficRecordService;
     private final ExternalCallRecordService externalCallRecordService;
+    private final RecordingControlService recordingControlService;
 
     @GetMapping("/apps")
     public Result<List<AppListItemVO>> apps() {
@@ -116,6 +119,15 @@ public class AdminController {
     @PostMapping("/mock-responses/{id}/enabled")
     public Result<Void> setMockEnabled(@PathVariable Long id, @RequestParam boolean enabled) {
         mockResponseService.setEnabled(id, enabled);
+        return Result.<Void>ok(null);
+    }
+
+    @PostMapping("/apps/{appId}/traffic-record/enabled")
+    public Result<Void> setTrafficRecordEnabled(@PathVariable String appId,
+                                                @RequestParam boolean enabled,
+                                                @RequestBody(required = false) TrafficRecordSwitchRequest request) {
+        recordingControlService.setEnabled(appId, enabled,
+                request == null ? null : request.getStartAt());
         return Result.<Void>ok(null);
     }
 

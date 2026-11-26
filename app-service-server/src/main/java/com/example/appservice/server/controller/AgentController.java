@@ -2,6 +2,7 @@ package com.example.appservice.server.controller;
 
 import com.example.appservice.common.dto.ExternalCallBatchDTO;
 import com.example.appservice.common.dto.HeartbeatRequest;
+import com.example.appservice.common.dto.HeartbeatResponse;
 import com.example.appservice.common.dto.MockResponseDTO;
 import com.example.appservice.common.dto.RegisterRequest;
 import com.example.appservice.common.dto.RegisterResponse;
@@ -39,9 +40,8 @@ public class AgentController {
     }
 
     @PostMapping("/heartbeat")
-    public Result<Void> heartbeat(@RequestBody HeartbeatRequest request) {
-        appService.heartbeat(request);
-        return Result.<Void>ok(null);
+    public Result<HeartbeatResponse> heartbeat(@RequestBody HeartbeatRequest request) {
+        return Result.ok(appService.heartbeat(request));
     }
 
     @PostMapping("/traffic/records")
