@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v1.0 |
 | 日期 | 2026-11-26 |
-| 状态 | 待实现 |
+| 状态 | 已实现 |
 | 目标模块 | `app-service-server`、`app-sdk-spring-boot-starter`、`app-service-common` |
 | 适用范围 | 管理端页面控制业务系统入站流量录制的开关与起始时间 |
 

@@ -63,8 +63,20 @@
 ## T05 执行日志
 
 - 本文件记录 T01–T04 的变更、验证命令、结果与提交号。
-- 提交：待 T06 完成后统一提交。
+- 提交：`214897f T05: 执行日志`
 
 ## T06 端到端验证与最终文档
 
-- 待执行。
+- 构建：`mvn -DskipTests package -q` 通过。
+- 启动管理端与 demo-order-service，验证状态流转：
+  - 初始：`enabled=False`，调用 3 次 `GET /api/orders` 后流量数不变（14→14）。
+  - 设置未来起始时间：`enabled=True`、`startAt` 非空；起始时间前调用 3 次接口，流量数不变（14→14）。
+  - 到点后调用 3 次接口，流量数增加（14→17）。
+  - 点击结束录制：`enabled=False`；继续调用接口不再新增流量。
+  - 设置立即开始后重启 demo：`enabled=True`、`onlineInstances=1`，心跳同步生效；调用接口流量数增加（18→20）。
+- 发现问题：停止录制后 `startAt` 未清空。原因是 MyBatis-Plus 默认 update 策略忽略 null 字段。
+- 修复：改用 `LambdaUpdateWrapper.set(App::getTrafficRecordStartAt, null)` 显式清空。
+- 修复过程提交：`5b34809 fix: 停止录制时清空起始时间`、`7d7a131 fix: 修正布尔字段方法引用`。
+- 修复后复验：`SCHEDULED enabled=True startAtSet=True`、`STOPPED enabled=False startAtCleared=True`。
+- 最终验证：`mvn -DskipTests compile -q` 通过。
+- 文档：README 增加页面控制说明，设计文档状态更新为“已实现”。
