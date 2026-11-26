@@ -43,7 +43,7 @@ public class RecordingControlService {
         }
         appMapper.update(null, new LambdaUpdateWrapper<App>()
                 .eq(App::getAppId, appId)
-                .set(App::getTrafficRecordEnabled, enabled)
+                .set(App::isTrafficRecordEnabled, enabled)
                 .set(App::getTrafficRecordStartAt, enabled ? startAt : null)
                 .set(App::getUpdatedAt, LocalDateTime.now()));
 
