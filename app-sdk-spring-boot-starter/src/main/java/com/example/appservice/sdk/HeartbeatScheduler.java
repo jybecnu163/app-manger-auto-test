@@ -27,6 +27,7 @@ public class HeartbeatScheduler {
     private final InterfaceScanner scanner;
     private final AppIdFileStore fileStore;
     private final Environment environment;
+    private final TrafficRecordSwitch recorderSwitch;
     private final long startTime = System.currentTimeMillis();
 
     private String appId;
@@ -40,12 +41,14 @@ public class HeartbeatScheduler {
                               AppRegistryClient client,
                               InterfaceScanner scanner,
                               AppIdFileStore fileStore,
-                              Environment environment) {
+                              Environment environment,
+                              TrafficRecordSwitch recorderSwitch) {
         this.properties = properties;
         this.client = client;
         this.scanner = scanner;
         this.fileStore = fileStore;
         this.environment = environment;
+        this.recorderSwitch = recorderSwitch;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -143,7 +146,10 @@ public class HeartbeatScheduler {
         request.setStatus("UP");
         request.setInterfaces(interfaces);
         request.setInterfacesHash(interfacesHash);
-        client.heartbeat(request);
+        HeartbeatResponse response = client.heartbeat(request);
+        if (response != null && response.getTrafficRecordEnabled() != null) {
+            recorderSwitch.set(response.getTrafficRecordEnabled(), response.getTrafficRecordStartAt());
+        }
     }
 
     private InstanceInfoDTO buildInstanceInfo() {

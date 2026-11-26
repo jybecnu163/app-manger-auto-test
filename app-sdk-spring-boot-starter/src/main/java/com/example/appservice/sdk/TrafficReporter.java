@@ -61,9 +61,6 @@ public class TrafficReporter {
     }
 
     private void flushTrafficRecords() {
-        if (!properties.getTrafficRecord().isEnabled()) {
-            return;
-        }
         TrafficRecordBuffer buffer = trafficBuffer.getIfAvailable();
         if (buffer == null) {
             return;

@@ -46,12 +46,18 @@ public class AppRegistryAutoConfiguration {
     }
 
     @Bean
+    public TrafficRecordSwitch trafficRecordSwitch(AppRegistryProperties properties) {
+        return new TrafficRecordSwitch(properties.getTrafficRecord().isEnabled(), null);
+    }
+
+    @Bean
     public HeartbeatScheduler heartbeatScheduler(AppRegistryProperties properties,
                                                  AppRegistryClient client,
                                                  InterfaceScanner scanner,
                                                  AppIdFileStore fileStore,
-                                                 Environment environment) {
-        return new HeartbeatScheduler(properties, client, scanner, fileStore, environment);
+                                                 Environment environment,
+                                                 TrafficRecordSwitch recorderSwitch) {
+        return new HeartbeatScheduler(properties, client, scanner, fileStore, environment, recorderSwitch);
     }
 
     @Bean
@@ -61,17 +67,22 @@ public class AppRegistryAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "app.registry.traffic-record", name = "enabled", havingValue = "true")
+    public TrafficRecordSwitchController trafficRecordSwitchController(AppIdentityResolver identity,
+                                                                       TrafficRecordSwitch recorderSwitch) {
+        return new TrafficRecordSwitchController(identity, recorderSwitch);
+    }
+
+    @Bean
     public TrafficRecordBuffer trafficRecordBuffer(AppRegistryProperties properties) {
         return new TrafficRecordBuffer(properties.getTrafficRecord().getQueueSize());
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "app.registry.traffic-record", name = "enabled", havingValue = "true")
     public TrafficCaptureFilter trafficCaptureFilter(AppRegistryProperties properties,
                                                      TrafficRecordBuffer buffer,
-                                                     AppIdentityResolver identity) {
-        return new TrafficCaptureFilter(properties, buffer, identity);
+                                                     AppIdentityResolver identity,
+                                                     TrafficRecordSwitch recorderSwitch) {
+        return new TrafficCaptureFilter(properties, buffer, identity, recorderSwitch);
     }
 
     @Bean

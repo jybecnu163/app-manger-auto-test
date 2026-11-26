@@ -1,6 +1,7 @@
 package com.example.appservice.sdk;
 
 import com.example.appservice.common.dto.HeartbeatRequest;
+import com.example.appservice.common.dto.HeartbeatResponse;
 import com.example.appservice.common.dto.RegisterRequest;
 import com.example.appservice.common.dto.RegisterResponse;
 import com.example.appservice.common.dto.Result;
@@ -33,11 +34,11 @@ public class AppRegistryClient {
         return unwrap(result);
     }
 
-    public void heartbeat(HeartbeatRequest request) {
-        Result<Void> result = post("/api/agent/heartbeat", request,
-                new ParameterizedTypeReference<Result<Void>>() {
+    public HeartbeatResponse heartbeat(HeartbeatRequest request) {
+        Result<HeartbeatResponse> result = post("/api/agent/heartbeat", request,
+                new ParameterizedTypeReference<Result<HeartbeatResponse>>() {
                 });
-        unwrap(result);
+        return unwrap(result);
     }
 
     private <T> Result<T> post(String path, Object request, ParameterizedTypeReference<Result<T>> responseType) {

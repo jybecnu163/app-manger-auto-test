@@ -33,13 +33,15 @@ public class TrafficCaptureFilter extends OncePerRequestFilter {
     private final AppRegistryProperties properties;
     private final TrafficRecordBuffer buffer;
     private final AppIdentityResolver identity;
+    private final TrafficRecordSwitch recorderSwitch;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public TrafficCaptureFilter(AppRegistryProperties properties, TrafficRecordBuffer buffer,
-                                AppIdentityResolver identity) {
+                                AppIdentityResolver identity, TrafficRecordSwitch recorderSwitch) {
         this.properties = properties;
         this.buffer = buffer;
         this.identity = identity;
+        this.recorderSwitch = recorderSwitch;
     }
 
     @Override
@@ -99,7 +101,7 @@ public class TrafficCaptureFilter extends OncePerRequestFilter {
 
     private boolean shouldCapture(String path, HttpServletRequest request) {
         AppRegistryProperties.TrafficRecordProperties config = properties.getTrafficRecord();
-        if (!config.isEnabled() || ReplayContext.isReplay()) {
+        if (!recorderSwitch.isActive() || ReplayContext.isReplay()) {
             return false;
         }
         for (String exclude : config.getExcludePaths()) {
